@@ -6,18 +6,14 @@ using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Owin.Host.HttpListener;
-using Microsoft.Owin.Hosting;
+using Nancy;
 using Nancy.Helpers;
+using Nancy.Hosting.Self;
 
 namespace RegistrarWebApi
 {
     public class RegistrarHttpServer
-    {
-        static RegistrarHttpServer()
-        {
-            OwinServerFactory.Initialize(new Dictionary<string, object>());
-        }    
+    { 
 
         private readonly object _syncObj = new object();
         private Task _task;
@@ -57,10 +53,15 @@ namespace RegistrarWebApi
 
         private void ServerMethod(CancellationToken token)
         {
-            using (WebApp.Start<Startup>(_baseAddress))
+            var config = new HostConfiguration();
+            config.UrlReservations.CreateAutomatically = true;
+
+            using (var host = new NancyHost(new Uri(_baseAddress), new DefaultNancyBootstrapper(), config))
             {
+                host.Start();
                 Console.WriteLine($"HTTP server at {_baseAddress} started");
                 token.WaitHandle.WaitOne();
+                host.Stop();
                 Console.WriteLine($"HTTP server at {_baseAddress} stopped");
             }
         }
