@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Julas.Utils;
 using Nancy;
+using Newtonsoft.Json;
 
 namespace RegistrarWebApi
 {
@@ -26,38 +27,25 @@ namespace RegistrarWebApi
         {
             foreach (var method in GetAllMethods())
             {
-                Get[method.Name.ToLower()] = _ => CallGetMethod(method);
+                Get[$"{method.Name.ToLower()}/{{argument}}"] = args => CallGetMethod(method, args.argument.ToString());
             }
         }
 
-        private object CallGetMethod(MethodInfo method)
+        private object CallGetMethod(MethodInfo method, string argument)
         {
-            var requestArgs = (IDictionary<string, object>)Request.Query;
-            var reflectionArgs = method.GetParameters();
-            var methodArgs = new object[reflectionArgs.Length];
-            foreach (var methodArg in reflectionArgs.Select((x, i) => new { Index = i, Value = x }))
-            {
-                var name = methodArg.Value.Name.ToLower();
-                object value = null;
-                if (requestArgs.Keys.Any(k => k.ToLower() == name))
-                {
-                    var requestArgValue = requestArgs.First(kvp => kvp.Key.ToLower() == name).Value.ToString();
-                    value = requestArgValue.ConvertTo(methodArg.Value.ParameterType);
-                }
-                else
-                {
-                    value = methodArg.Value.ParameterType.IsValueType
-                        ? Activator.CreateInstance(methodArg.Value.ParameterType)
-                        : null;
-                }
-                methodArgs[methodArg.Index] = value;
-            }
-            return method.Invoke(this, methodArgs);
+            var argType = method.GetParameters()[0].ParameterType;
+            var argValue = JsonConvert.DeserializeObject(argument, argType);
+            return JsonConvert.SerializeObject(method.Invoke(this, new object[] {argValue}));
         }
 
         private IEnumerable<MethodInfo> GetAllMethods()
         {
-            return GetType().GetMethods(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Public);
+            var methods = GetType().GetMethods(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Public);
+            if (methods.Any(x => x.GetParameters().Length != 1))
+            {
+                throw new InvalidOperationException("WebApi methods must have exactly one argument.");
+            }
+            return methods;
         }
     }
 }

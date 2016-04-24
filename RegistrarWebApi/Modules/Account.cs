@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,14 +10,10 @@ namespace RegistrarWebApi.Modules
 {
     public class Account : ModuleBase
     {
-        public string Echo(string name)
+        public string StartSession(string name)
         {
-            return $"Hello {name ?? "null"}!";
-        }
-
-        public string EchoNumber(int number)
-        {
-            return $"Hello {number}!";
+            var sessionID = Guid.NewGuid().ToString("N");
+            return $"Hello {name}! Your new session ID is {sessionID}.";
         }
     }
 }
