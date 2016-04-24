@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Owin.Hosting;
 using Owin;
+using RegistrarChatApi;
+using RegistrarSipApi;
 using RegistrarWebApi;
 
 namespace Registrar
@@ -19,8 +21,11 @@ namespace Registrar
             int chatApiPort = 9923;
 
             var webApiUri = $"http://{host}:{webApiPort}/";
+            var chatApiUri = $"http://{host}:{chatApiPort}/";
 
             using (new RegistrarHttpServer(webApiUri))
+            using (new RegistrarSignalRServer(chatApiUri))
+            using (new RegistrarSipServer(host, sipPort))
             {
                 Console.ReadLine();
             }

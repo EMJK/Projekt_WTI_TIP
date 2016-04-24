@@ -13,6 +13,8 @@
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <TargetFrameworkProfile />
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -76,12 +78,27 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\RegistrarChatApi\RegistrarChatApi.csproj">
+      <Project>{53600396-c5a9-4421-8ef8-a2415509be26}</Project>
+      <Name>RegistrarChatApi</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\RegistrarSipApi\RegistrarSipApi.csproj">
+      <Project>{49bcb3cf-3dfc-4b08-a845-7e66c8ab4dcf}</Project>
+      <Name>RegistrarSipApi</Name>
+    </ProjectReference>
     <ProjectReference Include="..\RegistrarWebApi\RegistrarWebApi.csproj">
       <Project>{efd601ba-26e2-4150-b1ad-363cdf9e1df0}</Project>
       <Name>RegistrarWebApi</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="..\packages\MSBuild.CopyDependencies.1.0.7\build\MSBuild.CopyDependencies.targets" Condition="Exists('..\packages\MSBuild.CopyDependencies.1.0.7\build\MSBuild.CopyDependencies.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\MSBuild.CopyDependencies.1.0.7\build\MSBuild.CopyDependencies.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\MSBuild.CopyDependencies.1.0.7\build\MSBuild.CopyDependencies.targets'))" />
+  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

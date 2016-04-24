@@ -6,11 +6,16 @@ using System.Threading.Tasks;
 
 namespace RegistrarSipApi
 {
-    public class RegistrarSipServer
+    public class RegistrarSipServer : IDisposable
     {
-        public void asdf()
+        public RegistrarSipServer(string host, int port)
         {
-            
+            Console.WriteLine($"SIP server started at {host}:{port}");
+        }
+
+        public void Dispose()
+        {
+            Console.WriteLine("SIP server stopped");
         }
     }
 }
