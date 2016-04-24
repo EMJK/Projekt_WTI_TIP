@@ -11,7 +11,7 @@ namespace Registrar
     {
         static void Main(string[] args)
         {
-            var server = new RegistrarHttpServer("http://localhost:9000");
+            var server = new RegistrarHttpServer("http://localhost:9000/api/");
             while (true)
             {
                 server.Start();

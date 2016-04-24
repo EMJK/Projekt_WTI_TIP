@@ -39,6 +39,22 @@
       <HintPath>..\packages\log4net.2.0.5\lib\net45-full\log4net.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="SIPSorcery.Net, Version=1.5.0.35789, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\SIPSorcery.1.5.5\lib\net46\SIPSorcery.Net.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="SIPSorcery.SIP.App, Version=1.5.0.35791, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\SIPSorcery.1.5.5\lib\net46\SIPSorcery.SIP.App.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="SIPSorcery.SIP.Core, Version=1.5.0.37141, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\SIPSorcery.1.5.5\lib\net46\SIPSorcery.SIP.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="SIPSorcery.Sys, Version=1.5.0.37141, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\SIPSorcery.1.5.5\lib\net46\SIPSorcery.Sys.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Configuration" />
