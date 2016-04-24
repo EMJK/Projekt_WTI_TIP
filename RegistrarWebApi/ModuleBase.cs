@@ -29,11 +29,12 @@ namespace RegistrarWebApi
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        protected ModuleBase() : base(GetModuleName())
+        protected ModuleBase() : base($"{GetModuleName()}")
         {
             foreach (var method in GetAllMethods())
             {
-                Get[$"{method.Name.ToLower().Map(x => x.EndsWith("module") ? x.Substring(0, x.Length - 6) : x)}/{{argument}}"] = 
+                var url = $"{ method.Name.ToLower().Map(x => x.EndsWith("module") ? x.Substring(0, x.Length - 6) : x)}";
+                Get[$"{url}/{{argument}}"] = 
                     args => CallGetMethod(method, args.argument.ToString());
             }
         }
@@ -46,11 +47,11 @@ namespace RegistrarWebApi
             {
                 var argValue = JsonConvert.DeserializeObject(argument, method.GetParameters()[0].ParameterType, SerializerSettings);
                 var retObj = method.Invoke(this, new[] { argValue });
-                returnValue = Activator.CreateInstance(returnType, new object[] { 200, string.Empty, retObj });
+                returnValue = Activator.CreateInstance(returnType, 200, string.Empty, retObj);
             }
             catch (Exception ex)
             {
-                returnValue = Activator.CreateInstance(returnType, new object[] {500, ex.ToString(), GetEmptyBody(method.ReturnType)});
+                returnValue = Activator.CreateInstance(returnType, 500, ex.ToString(), GetEmptyBody(method.ReturnType));
             }
             return JsonConvert.SerializeObject(returnValue, SerializerSettings);
         }

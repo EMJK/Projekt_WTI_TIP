@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Owin.Hosting;
+using Owin;
 using RegistrarWebApi;
 
 namespace Registrar
@@ -11,13 +13,16 @@ namespace Registrar
     {
         static void Main(string[] args)
         {
-            var server = new RegistrarHttpServer("http://localhost:9000/api/");
-            while (true)
+            string host = "localhost";
+            int webApiPort = 9922;
+            int sipPort = 5060;
+            int chatApiPort = 9923;
+
+            var webApiUri = $"http://{host}:{webApiPort}/";
+
+            using (new RegistrarHttpServer(webApiUri))
             {
-                server.Start();
-                Console.ReadKey();
-                server.Stop();
-                Console.ReadKey();
+                Console.ReadLine();
             }
         }
     }

@@ -9,61 +9,37 @@ using System.Threading.Tasks;
 using Nancy;
 using Nancy.Helpers;
 using Nancy.Hosting.Self;
+using Nancy.Owin;
 
 namespace RegistrarWebApi
 {
-    public class RegistrarHttpServer
-    { 
+    public class RegistrarHttpServer : IDisposable
+    {
+        private NancyHost _nancyHost;
 
-        private readonly object _syncObj = new object();
-        private Task _task;
-        private CancellationTokenSource _cancellationTokenSource;
-        private readonly string _baseAddress;
-
-        public RegistrarHttpServer(string baseAddress)
+        public RegistrarHttpServer(string webApiUri)
         {
-            _baseAddress = baseAddress;
-        }
-        public void Start()
-        {
-            lock (_syncObj)
-            {
-                _cancellationTokenSource = new CancellationTokenSource();
-                var token = _cancellationTokenSource.Token;
-                _task = Task.Factory.StartNew(
-                    () => ServerMethod(token), 
-                    token, 
-                    TaskCreationOptions.LongRunning, 
-                    TaskScheduler.Default);
-            }
+            Start(webApiUri);
         }
 
-        public void Stop()
+        private void Start(string webApiUri)
         {
-            lock (_syncObj)
-            {
-                _cancellationTokenSource.Cancel();
-                _cancellationTokenSource.Dispose();
-                _cancellationTokenSource = null;
-                _task.Wait();
-                _task.Dispose();
-                _task = null;
-            }
+            _nancyHost = new NancyHost(new Uri(webApiUri));
+            _nancyHost.Start();
+            Console.WriteLine($"HTTP server started at {webApiUri}");
         }
 
-        private void ServerMethod(CancellationToken token)
+        private void Stop()
         {
-            var config = new HostConfiguration();
-            config.UrlReservations.CreateAutomatically = true;
+            _nancyHost.Stop();
+            _nancyHost.Dispose();
+            _nancyHost = null;
+            Console.WriteLine("HTTP server stopped");
+        }
 
-            using (var host = new NancyHost(new Uri(_baseAddress), new DefaultNancyBootstrapper(), config))
-            {
-                host.Start();
-                Console.WriteLine($"HTTP server at {_baseAddress} started");
-                token.WaitHandle.WaitOne();
-                host.Stop();
-                Console.WriteLine($"HTTP server at {_baseAddress} stopped");
-            }
+        public void Dispose()
+        {
+            Stop();
         }
     }
 }
