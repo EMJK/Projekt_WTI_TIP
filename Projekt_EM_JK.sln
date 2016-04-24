@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Registrar", "Registrar\Regi
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "lib", "lib", "{4075CA0C-EE34-46D7-946D-74F780D38693}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RegistrarSipApi", "RegistrarSipApi\RegistrarSipApi.csproj", "{49BCB3CF-3DFC-4B08-A845-7E66C8AB4DCF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,11 +25,16 @@ Global
 		{D10C073E-E958-4919-93F8-E7B5139FD961}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D10C073E-E958-4919-93F8-E7B5139FD961}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D10C073E-E958-4919-93F8-E7B5139FD961}.Release|Any CPU.Build.0 = Release|Any CPU
+		{49BCB3CF-3DFC-4B08-A845-7E66C8AB4DCF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{49BCB3CF-3DFC-4B08-A845-7E66C8AB4DCF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{49BCB3CF-3DFC-4B08-A845-7E66C8AB4DCF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{49BCB3CF-3DFC-4B08-A845-7E66C8AB4DCF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{EFD601BA-26E2-4150-B1AD-363CDF9E1DF0} = {4075CA0C-EE34-46D7-946D-74F780D38693}
+		{49BCB3CF-3DFC-4B08-A845-7E66C8AB4DCF} = {4075CA0C-EE34-46D7-946D-74F780D38693}
 	EndGlobalSection
 EndGlobal
