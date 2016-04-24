@@ -5,15 +5,18 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Nancy;
+using RegistrarWebApi.Models.Account;
 
 namespace RegistrarWebApi.Modules
 {
     public class Account : ModuleBase
     {
-        public string StartSession(string name)
+        public RegisterAccountResponse Register(RegisterAccountRequest data)
         {
-            var sessionID = Guid.NewGuid().ToString("N");
-            return $"Hello {name}! Your new session ID is {sessionID}.";
+            return new RegisterAccountResponse()
+            {
+                Message = $"A new account for \"{data.UserName}\" was created."
+            };
         }
     }
 }

@@ -10,11 +10,17 @@ using System.Threading.Tasks;
 using Julas.Utils;
 using Nancy;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace RegistrarWebApi
 {
     public abstract class ModuleBase : NancyModule
     {
+        private static readonly JsonSerializerSettings SerializerSettings = new JsonSerializerSettings()
+        {
+            Formatting = Formatting.Indented
+        };    
+
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static string GetModuleName()
         {
@@ -27,15 +33,33 @@ namespace RegistrarWebApi
         {
             foreach (var method in GetAllMethods())
             {
-                Get[$"{method.Name.ToLower()}/{{argument}}"] = args => CallGetMethod(method, args.argument.ToString());
+                Get[$"{method.Name.ToLower().Map(x => x.EndsWith("module") ? x.Substring(0, x.Length - 6) : x)}/{{argument}}"] = 
+                    args => CallGetMethod(method, args.argument.ToString());
             }
         }
 
         private object CallGetMethod(MethodInfo method, string argument)
         {
-            var argType = method.GetParameters()[0].ParameterType;
-            var argValue = JsonConvert.DeserializeObject(argument, argType);
-            return JsonConvert.SerializeObject(method.Invoke(this, new object[] {argValue}));
+            var returnType = typeof(Response<>).MakeGenericType(method.ReturnType);
+            object returnValue;
+            try
+            {
+                var argValue = JsonConvert.DeserializeObject(argument, method.GetParameters()[0].ParameterType, SerializerSettings);
+                var retObj = method.Invoke(this, new[] { argValue });
+                returnValue = Activator.CreateInstance(returnType, new object[] { 200, string.Empty, retObj });
+            }
+            catch (Exception ex)
+            {
+                returnValue = Activator.CreateInstance(returnType, new object[] {500, ex.ToString(), GetEmptyBody(method.ReturnType)});
+            }
+            return JsonConvert.SerializeObject(returnValue, SerializerSettings);
+        }
+
+        private object GetEmptyBody(Type type)
+        {
+            return type.IsValueType
+                ? Activator.CreateInstance(type)
+                : null;
         }
 
         private IEnumerable<MethodInfo> GetAllMethods()
