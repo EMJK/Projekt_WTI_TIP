@@ -4,8 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Owin.Hosting;
+using Ninject;
 using Owin;
 using RegistrarChatApi;
+using RegistrarCommon;
 using RegistrarSipApi;
 using RegistrarWebApi;
 
@@ -13,6 +15,8 @@ namespace Registrar
 {
     class Program
     {
+        private static readonly SessionCache Cache = new SessionCache(TimeSpan.FromMinutes(5));
+
         static void Main(string[] args)
         {
             string host = "localhost";
@@ -23,12 +27,21 @@ namespace Registrar
             var webApiUri = $"http://{host}:{webApiPort}/";
             var chatApiUri = $"http://{host}:{chatApiPort}/";
 
-            using (new RegistrarHttpServer(webApiUri))
-            using (new RegistrarSignalRServer(chatApiUri))
-            using (new RegistrarSipServer(host, sipPort))
+            var kernel = GetNinjectKernel();
+
+            using (new RegistrarHttpServer(webApiUri, kernel))
+            using (new RegistrarSignalRServer(chatApiUri, kernel))
+            using (new RegistrarSipServer(host, sipPort, kernel))
             {
                 Console.ReadLine();
             }
+        }
+
+        private static IKernel GetNinjectKernel()
+        {
+            var kernel = new StandardKernel();
+            kernel.Bind<ISessionCache>().ToMethod(c => Cache);
+            return kernel;
         }
     }
 }

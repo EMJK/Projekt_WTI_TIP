@@ -3,18 +3,23 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNet.SignalR;
 using Microsoft.Owin.Cors;
 using Microsoft.Owin.Hosting;
+using Ninject;
 using Owin;
 
 namespace RegistrarChatApi
 {
     public class RegistrarSignalRServer : IDisposable
     {
+        private readonly IKernel _kernel;
         private IDisposable _webApp;
-        public RegistrarSignalRServer(string chatApiUri)
+
+        public RegistrarSignalRServer(string chatApiUri, IKernel kernel)
         {
-            _webApp = WebApp.Start<Startup>(chatApiUri);
+            _kernel = kernel;
+            _webApp = WebApp.Start(chatApiUri, Configuration);
             Console.WriteLine($"Chat server started at {chatApiUri}");
         }
 
@@ -24,13 +29,21 @@ namespace RegistrarChatApi
             _webApp = null;
             Console.WriteLine("Chat server stopped");
         }
-        class Startup
+
+        private void Configuration(IAppBuilder app)
         {
-            public void Configuration(IAppBuilder app)
+            app.UseCors(CorsOptions.AllowAll);
+            app.Map("/signalr", map =>
             {
-                app.UseCors(CorsOptions.AllowAll);
-                app.MapSignalR();
-            }
+
+                map.UseCors(CorsOptions.AllowAll);
+                var hubConfiguration = new HubConfiguration()
+                {
+                    EnableDetailedErrors = true,
+                    Resolver = new NinjectDependencyResolver(_kernel)
+                };
+                map.RunSignalR(hubConfiguration);
+            });
         }
     }
 }

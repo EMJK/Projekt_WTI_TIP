@@ -39,6 +39,10 @@
       <HintPath>..\packages\log4net.2.0.5\lib\net45-full\log4net.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Ninject, Version=3.2.0.0, Culture=neutral, PublicKeyToken=c7192dc5380945e7, processorArchitecture=MSIL">
+      <HintPath>..\packages\Ninject.3.2.2.0\lib\net45-full\Ninject.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="SIPSorcery.Net, Version=1.5.0.35789, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\SIPSorcery.1.5.5\lib\net46\SIPSorcery.Net.dll</HintPath>
       <Private>True</Private>

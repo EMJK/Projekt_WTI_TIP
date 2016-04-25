@@ -10,21 +10,24 @@ using Nancy;
 using Nancy.Helpers;
 using Nancy.Hosting.Self;
 using Nancy.Owin;
+using Ninject;
 
 namespace RegistrarWebApi
 {
     public class RegistrarHttpServer : IDisposable
     {
+        private readonly IKernel _kernel;
         private NancyHost _nancyHost;
 
-        public RegistrarHttpServer(string webApiUri)
+        public RegistrarHttpServer(string webApiUri, IKernel kernel)
         {
+            _kernel = kernel;
             Start(webApiUri);
         }
 
         private void Start(string webApiUri)
         {
-            _nancyHost = new NancyHost(new Uri(webApiUri));
+            _nancyHost = new NancyHost(new Uri(webApiUri), new NinjectBootstrapper(_kernel));
             _nancyHost.Start();
             Console.WriteLine($"HTTP server started at {webApiUri}");
         }
