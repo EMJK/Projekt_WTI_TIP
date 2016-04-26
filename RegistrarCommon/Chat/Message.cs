@@ -1,6 +1,6 @@
 ﻿namespace RegistrarCommon.Chat
 {
-    public class OutgoingMessage
+    public class Message
     {
         public string SenderUserID { get; set; }
         public string DestinationUserID { get; set; }

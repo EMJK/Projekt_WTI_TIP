@@ -18,5 +18,7 @@ namespace RegistrarWebApi.Modules
                 Message = $"A new account for \"{data.UserName}\" was created."
             };
         }
+
+
     }
 }

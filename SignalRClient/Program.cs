@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNet.SignalR.Client;
+using RegistrarCommon.Chat;
 
 namespace SignalRClient
 {
@@ -11,10 +12,21 @@ namespace SignalRClient
     {
         static void Main(string[] args)
         {
-            var hubConnection = new HubConnection("http://localhost:9923/");
-            var proxy = hubConnection.CreateHubProxy("chat");
-            proxy.On<string>("message", s => Console.WriteLine($"Echo: {s}"));
+            var queryStrig = new Dictionary<string, string>();
+            queryStrig["UserName"] = "julkwiec";
+            queryStrig["SessionKey"] = "123";
+            var hubConnection = new HubConnection("http://localhost:9923/", queryStrig);
+            var proxy = hubConnection.CreateHubProxy("ChatHub");
+            proxy.On<Message>("Message", s => Console.WriteLine($"Received from {s.SenderUserID} to {s.DestinationUserID}: {s.Text}"));
             hubConnection.Start().Wait();
+            proxy.Invoke("Message", new Message()
+            {
+                DestinationUserID = "julkwiec",
+                SenderUserID = "julkwiec",
+                Text = "Hola amigo!"
+
+            }).Wait();
+            Console.ReadLine();
         }
     }
 }

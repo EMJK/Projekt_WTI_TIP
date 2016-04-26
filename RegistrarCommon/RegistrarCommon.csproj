@@ -42,9 +42,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Chat\ClientListBroadcast.cs" />
-    <Compile Include="Chat\IncomingMessage.cs" />
     <Compile Include="Chat\RegisterRequest.cs" />
-    <Compile Include="Chat\OutgoingMessage.cs" />
+    <Compile Include="Chat\Message.cs" />
     <Compile Include="ConcurrentHashSet.cs" />
     <Compile Include="ISessionCache.cs" />
     <Compile Include="Session.cs" />

@@ -33,47 +33,76 @@ namespace RegistrarChatApi
             SendClientList();
         }
 
-        public void Message(IncomingMessage incomingMessage)
+        private Session GetSession()
         {
-            var entry = _cache.GetSession(incomingMessage.UserID);
-            if (entry.SessionID == incomingMessage.SessionID)
+            lock (_lock)
+            {
+                var con = _connections.FirstOrDefault(x => x.ConnectionID == Context.ConnectionId);
+                if (con == null) return null;
+                return _cache.GetSession(con.UserID);
+            }
+        }
+
+        public void Message(Message clientMessage)
+        {
+            var session = GetSession();
+            if (session != null)
             {
                 string destinationConnectionID;
                 lock (_lock)
                 {
                     destinationConnectionID =
-                        _connections.FirstOrDefault(x => x.UserID == incomingMessage.DestinationUserID)?.ConnectionID;
+                        _connections.FirstOrDefault(x => x.UserID == clientMessage.DestinationUserID)?.ConnectionID;
                 }
                 if (destinationConnectionID != null)
                 {
-                    var msg = new OutgoingMessage()
+                    var msg = new Message()
                     {
-                        DestinationUserID = incomingMessage.DestinationUserID, 
-                        SenderUserID = incomingMessage.UserID, 
-                        Text = incomingMessage.Text
+                        DestinationUserID = clientMessage.DestinationUserID,
+                        SenderUserID = session.UserID,
+                        Text = clientMessage.Text
                     };
                     Clients.Client(destinationConnectionID).Message(msg);
                 }
             }
         }
 
-        public void Register(RegisterRequest register)
+        public override Task OnConnected()
         {
-            var entry = _cache.GetSession(register.UserID);
-            if (entry?.SessionID == register.SessionID)
+            var user = Context.QueryString["UserName"];
+            var key = Context.QueryString["SessionKey"];
+            var session = _cache.GetSession(user);
+            if (session != null && session.SessionID == key)
             {
-                _cache.CreateSession(register.UserID);
                 lock (_lock)
                 {
-                    _connections.Add(new Connection() {ConnectionID = Context.ConnectionId, UserID = register.UserID});
+                    _connections.Add(new Connection()
+                    {
+                        ConnectionID = Context.ConnectionId,
+                        UserID = user
+                    });
                 }
-                Clients.Caller.RegisterResponse(new RegisterResponse() {Success = true});
-                SendClientList();
             }
-            else
+            return base.OnConnected();
+        }
+
+        public override Task OnReconnected()
+        {
+            var user = Context.QueryString["UserName"];
+            var key = Context.QueryString["SessionKey"];
+            var session = _cache.GetSession(user);
+            if (session != null && session.SessionID == key)
             {
-                Clients.Caller.RegisterResponse(new RegisterResponse() { Success = false, StatusMessage = "Invalid session" });
+                lock (_lock)
+                {
+                    _connections.Add(new Connection()
+                    {
+                        ConnectionID = Context.ConnectionId,
+                        UserID = user
+                    });
+                }
             }
+            return base.OnReconnected();
         }
 
         public override Task OnDisconnected(bool stopCalled)

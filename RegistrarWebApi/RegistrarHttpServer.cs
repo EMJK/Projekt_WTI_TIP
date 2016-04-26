@@ -22,6 +22,7 @@ namespace RegistrarWebApi
         public RegistrarHttpServer(string webApiUri, IKernel kernel)
         {
             _kernel = kernel;
+            _kernel.Load<Nancy.Bootstrappers.Ninject.FactoryModule>();
             Start(webApiUri);
         }
 
