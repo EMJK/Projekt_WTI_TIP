@@ -3,58 +3,96 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Caching;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace RegistrarCommon
 {
     public class SessionCache : ISessionCache
     {
+        private readonly object _lockObj = new object();
+        private Timer _timer;
+        private readonly List<Session> _sessions; 
         private readonly TimeSpan _sessionLifetime;
-        private readonly MemoryCache _cache;
         public event Action<Session> SessionExpired;
 
         public SessionCache(TimeSpan sessionLifetime)
         {
             _sessionLifetime = sessionLifetime;
-            _cache = new MemoryCache("SessionCache");
+            _sessions = new List<Session>();
+            _timer = new Timer(Elapsed, null, TimeSpan.FromMilliseconds(-1), TimeSpan.FromSeconds(1));
+        }
+
+        private void Elapsed(object state)
+        {
+            lock (_lockObj)
+            {
+                var now = DateTime.Now;
+                foreach (var session in _sessions.ToList())
+                {
+                    if (session.LastRefreshed + _sessionLifetime < now)
+                    {
+                        SessionExpired?.Invoke(session);
+                        _sessions.Remove(session);
+                    }
+                    else
+                    {
+                        session.LastRefreshed = now;
+                    }
+                }
+            }
         }
 
         public Session CreateSession(string userID)
         {
-            var session = new Session(userID, Guid.NewGuid().ToString("N"), DateTimeOffset.Now);
-            var cacheItem = new CacheItem(userID, session);
-            var policy = new CacheItemPolicy()
+            var session = new Session(userID, Guid.NewGuid().ToString("N"), DateTime.Now);
+            lock (_lockObj)
             {
-                SlidingExpiration = _sessionLifetime,
-                UpdateCallback = UpdateCallback
-            };
-            _cache.Set(cacheItem, policy);
+                _sessions.Add(session);
+            }
             return session;
         }
 
-        public Session GetSession(string userID)
+        public Session GetSessionByUserID(string userID)
         {
-            return (Session) _cache.Get(userID);
+            lock (_lockObj)
+            {
+                return _sessions.FirstOrDefault(s => s.UserID == userID);
+            }
         }
 
-        public void CloseSession(string userID)
+        public Session GetSessionBySessionID(string sessionID)
         {
-            _cache.Remove(userID);
+            lock (_lockObj)
+            {
+                return _sessions.FirstOrDefault(s => s.SessionID == sessionID);
+            }
+        }
+
+        public void CloseSession(string sessionID)
+        {
+            lock (_lockObj)
+            {
+                var sessionToRemove = _sessions.FirstOrDefault(s => s.SessionID == sessionID);
+                if (sessionToRemove != null)
+                {
+                    _sessions.Remove(sessionToRemove);
+                }
+            }
         }
 
         public bool VerifySession(string userID, string sessionID)
         {
-            return ((Session) _cache.Get(userID))?.SessionID == sessionID;
-        }
-
-        private void UpdateCallback(CacheEntryUpdateArguments arguments)
-        {
-            OnSessionExpired((Session) arguments.UpdatedCacheItem.Value);
-        }
-
-        protected virtual void OnSessionExpired(Session session)
-        {
-            SessionExpired?.Invoke(session);
+            lock (_lockObj)
+            {
+                var session = _sessions.FirstOrDefault(s => s.UserID == userID && s.SessionID == sessionID);
+                if (session != null)
+                {
+                    session.LastRefreshed = DateTime.Now;
+                    return true;
+                }
+                return false;
+            }
         }
     }
 }

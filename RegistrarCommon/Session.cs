@@ -8,15 +8,17 @@ namespace RegistrarCommon
 {
     public class Session
     {
-        public DateTimeOffset StartedAt { get; }
+        public DateTime StartedAt { get; }
+        public DateTime LastRefreshed { get; set; }
         public string UserID { get; }
         public string SessionID { get; }
 
-        public Session(string userID, string sessionID, DateTimeOffset startedAt)
+        public Session(string userID, string sessionID, DateTime startedAt)
         {
             UserID = userID;
             SessionID = sessionID;
             StartedAt = startedAt;
+            LastRefreshed = startedAt;
         }
     }
 }

@@ -11,6 +11,7 @@ using Julas.Utils;
 using Nancy;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using RegistrarWebApiClient;
 
 namespace RegistrarWebApi
 {
@@ -71,6 +72,16 @@ namespace RegistrarWebApi
                 throw new InvalidOperationException("WebApi methods must have exactly one argument.");
             }
             return methods;
+        }
+
+        protected static Response<T> CreateResponse<T>(T body)
+        {
+            return new Response<T>()
+            {
+                Body = body,
+                ResponseCode = 200,
+                ResponseMessage = null
+            };
         }
     }
 }

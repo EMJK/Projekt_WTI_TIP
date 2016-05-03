@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.24720.0
+VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RegistrarWebApi", "RegistrarWebApi\RegistrarWebApi.csproj", "{EFD601BA-26E2-4150-B1AD-363CDF9E1DF0}"
 EndProject
@@ -18,6 +18,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SignalRClient", "SignalRClient\SignalRClient.csproj", "{343CF585-9724-4C7E-995E-2F023C20391B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RegistrarCommon", "RegistrarCommon\RegistrarCommon.csproj", "{3D9DCDD7-1145-420D-9931-33070A3715D3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RegistrarWebApiClient", "RegistrarWebApiClient\RegistrarWebApiClient.csproj", "{6F7DD597-04A5-45AF-BAF2-353ACA792168}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -49,6 +51,10 @@ Global
 		{3D9DCDD7-1145-420D-9931-33070A3715D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3D9DCDD7-1145-420D-9931-33070A3715D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3D9DCDD7-1145-420D-9931-33070A3715D3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6F7DD597-04A5-45AF-BAF2-353ACA792168}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6F7DD597-04A5-45AF-BAF2-353ACA792168}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6F7DD597-04A5-45AF-BAF2-353ACA792168}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6F7DD597-04A5-45AF-BAF2-353ACA792168}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -59,5 +65,6 @@ Global
 		{53600396-C5A9-4421-8EF8-A2415509BE26} = {4075CA0C-EE34-46D7-946D-74F780D38693}
 		{343CF585-9724-4C7E-995E-2F023C20391B} = {BF55F6F5-3DAC-415C-943B-7BFEABF94A34}
 		{3D9DCDD7-1145-420D-9931-33070A3715D3} = {4075CA0C-EE34-46D7-946D-74F780D38693}
+		{6F7DD597-04A5-45AF-BAF2-353ACA792168} = {4075CA0C-EE34-46D7-946D-74F780D38693}
 	EndGlobalSection
 EndGlobal

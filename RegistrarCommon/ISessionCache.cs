@@ -5,9 +5,10 @@ namespace RegistrarCommon
     public interface ISessionCache
     {
         event Action<Session> SessionExpired;
-        void CloseSession(string userID);
+        void CloseSession(string sessionID);
         Session CreateSession(string userID);
-        Session GetSession(string userID);
+        Session GetSessionByUserID(string userID);
+        Session GetSessionBySessionID(string sessionID);
         bool VerifySession(string userID, string sessionID);
     }
 }
