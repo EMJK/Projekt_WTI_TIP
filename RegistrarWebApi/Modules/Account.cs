@@ -17,7 +17,7 @@ namespace RegistrarWebApi.Modules
         {
             return new RegisterAccountResponse()
             {
-                Message = $"A new account for \"{data.UserName}\" was created."
+                Message = $"A new account for \"{data.UserID}\" was created."
             };
         }
 

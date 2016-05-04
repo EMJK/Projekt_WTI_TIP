@@ -41,8 +41,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Chat\ClientListBroadcast.cs" />
-    <Compile Include="Chat\Message.cs" />
+    <Compile Include="Disposable.cs" />
     <Compile Include="ISessionCache.cs" />
     <Compile Include="Session.cs" />
     <Compile Include="SessionCache.cs" />

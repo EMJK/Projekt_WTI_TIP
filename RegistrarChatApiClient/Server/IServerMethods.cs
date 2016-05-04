@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RegistrarCommon.Chat
+namespace RegistrarChatApiClient
 {
-    public class ClientListBroadcast
+    public interface IServerMethods
     {
-        public List<string> Clients { get; set; } 
+        void SendMessage(SendMessageParam param);
     }
 }

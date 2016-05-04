@@ -99,6 +99,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\RegistrarChatApiClient\RegistrarChatApiClient.csproj">
+      <Project>{6a733f41-9eba-4f2d-ad95-fd1fde3210f7}</Project>
+      <Name>RegistrarChatApiClient</Name>
+    </ProjectReference>
     <ProjectReference Include="..\RegistrarCommon\RegistrarCommon.csproj">
       <Project>{3D9DCDD7-1145-420D-9931-33070A3715D3}</Project>
       <Name>RegistrarCommon</Name>

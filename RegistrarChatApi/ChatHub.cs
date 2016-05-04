@@ -6,15 +6,15 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNet.SignalR;
 using Microsoft.AspNet.SignalR.Hubs;
+using RegistrarChatApiClient;
 using RegistrarCommon;
-using RegistrarCommon.Chat;
 
 namespace RegistrarChatApi
 {
-    public class ChatHub : Hub
+    public class ChatHub : Hub, IServerMethods
     {
         private readonly ISessionCache _cache;
-        private readonly List<Connection> _connections; 
+        private readonly IList<Connection> _connections;
         private readonly object _lock = new object();
 
         public ChatHub(ISessionCache cache)
@@ -42,28 +42,6 @@ namespace RegistrarChatApi
             var con = _connections.FirstOrDefault(x => x.ConnectionID == Context.ConnectionId);
             if (con == null) return null;
             return _cache.GetSessionBySessionID(con.Session.SessionID);
-        }
-
-        public void Message(Message clientMessage)
-        {
-            lock (_lock)
-            {
-                var session = GetSession();
-                if (session != null)
-                {
-                    var destinationConnectionID = _connections.FirstOrDefault(x => x.Session.UserID == clientMessage.DestinationUserID)?.ConnectionID;
-                    if (destinationConnectionID != null)
-                    {
-                        var msg = new Message()
-                        {
-                            DestinationUserID = clientMessage.DestinationUserID,
-                            SenderUserID = session.UserID,
-                            Text = clientMessage.Text
-                        };
-                        Clients.Client(destinationConnectionID).Message(msg);
-                    }
-                }
-            }
         }
 
         public override Task OnConnected()
@@ -107,9 +85,35 @@ namespace RegistrarChatApi
 
         private void SendClientList()
         {
-            List<string> users = _connections.Select(x => x.Session.UserID).ToList();
-            var msg = new ClientListBroadcast() {Clients = users};
-            Clients.All.ClientList(msg);
+            var msg = new ClientListParam()
+            {
+                Clients = _connections.Select(x => x.Session.UserID).ToList()
+            };
+            foreach (var connection in _connections)
+            {
+                Clients.Client(connection.ConnectionID).ClientList(msg);
+            }
+        }
+
+        public void SendMessage(SendMessageParam param)
+        {
+            lock (_lock)
+            {
+                var session = GetSession();
+                if (session != null)
+                {
+                    var destinationConnectionID = _connections.FirstOrDefault(x => x.Session.UserID == param.DestinationUserID)?.ConnectionID;
+                    if (destinationConnectionID != null)
+                    {
+                        var msg = new MessageParam()
+                        {
+                            SenderUserID = session.UserID,
+                            Message = param.Message
+                        };
+                        Clients.Client(destinationConnectionID).Message(msg);
+                    }
+                }
+            }
         }
     }
 }

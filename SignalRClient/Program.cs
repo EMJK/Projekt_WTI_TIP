@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNet.SignalR.Client;
-using RegistrarCommon.Chat;
+using RegistrarChatApiClient;
 using RegistrarWebApiClient;
 using RegistrarWebApiClient.Models.Account;
 
@@ -14,24 +14,35 @@ namespace SignalRClient
     {
         static void Main(string[] args)
         {
-            var client = new WebApiClient("http://localhost:9922/");
-            var response = client.Account.Register(new RegisterAccountRequest() {UserName = "HewiMetal"});
+            var webApiClient = new WebApiClient("http://localhost:9922/");
+            var response2 = webApiClient.Account.Login(new LoginRequest() { UserID = "HewiMetal" });
+            Console.WriteLine($"Logged in as `HewiMetal`. SessionID: `{response2.SessionID}`");
+            var chatApiClient = new ChatApiClient("http://localhost:9923/", "HewiMetal", response2.SessionID, new ClientMethods());
+            Console.WriteLine($"Connected to SignalR server");
 
-            var queryStrig = new Dictionary<string, string>();
-            queryStrig["UserName"] = "julkwiec";
-            queryStrig["SessionKey"] = "123";
-            var hubConnection = new HubConnection("http://localhost:9923/", queryStrig);
-            var proxy = hubConnection.CreateHubProxy("ChatHub");
-            proxy.On<Message>("Message", s => Console.WriteLine($"Received from {s.SenderUserID} to {s.DestinationUserID}: {s.Text}"));
-            hubConnection.Start().Wait();
-            proxy.Invoke("Message", new Message()
+            while (true)
             {
-                DestinationUserID = "julkwiec",
-                SenderUserID = "julkwiec",
-                Text = "Hola amigo!"
+                var str = Console.ReadLine();
+                chatApiClient.Server.SendMessage(new SendMessageParam()
+                {
+                    DestinationUserID = "HewiMetal",
+                    Message = str
+                });
+            }
+        }
 
-            }).Wait();
-            Console.ReadLine();
+        class ClientMethods : IClientMethods
+        {
+            public void Message(MessageParam param)
+            {
+                Console.WriteLine($"[Message] From: {param.SenderUserID}; Message: {param.Message}");
+            }
+
+            public void ClientList(ClientListParam param)
+            {
+                var clients = param.Clients.Aggregate((x, y) => x + ", " + y);
+                Console.WriteLine($"[ClientList] Clients: {clients}");
+            }
         }
     }
 }
