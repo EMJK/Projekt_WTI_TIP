@@ -13,12 +13,14 @@ namespace RegistrarChatApi
 {
     public class RegistrarSignalRServer : IDisposable
     {
-        private readonly IKernel _kernel;
+        internal static IKernel Kernel;
         private IDisposable _webApp;
 
         public RegistrarSignalRServer(string chatApiUri, IKernel kernel)
         {
-            _kernel = kernel;
+            var connections = new List<Connection>();
+            Kernel = kernel;
+            Kernel.Bind<IList<Connection>>().ToMethod(x => connections);
             _webApp = WebApp.Start(chatApiUri, Configuration);
             Console.WriteLine($"Chat server started at {chatApiUri}");
         }
@@ -40,7 +42,7 @@ namespace RegistrarChatApi
                 var hubConfiguration = new HubConfiguration()
                 {
                     EnableDetailedErrors = true,
-                    Resolver = new NinjectDependencyResolver(_kernel)
+                    Resolver = new NinjectDependencyResolver(Kernel)
                 };
                 map.RunSignalR(hubConfiguration);
             });

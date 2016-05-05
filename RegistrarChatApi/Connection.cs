@@ -7,7 +7,7 @@ using RegistrarCommon;
 
 namespace RegistrarChatApi
 {
-    class Connection
+    public class Connection
     {
         public string ConnectionID { get; set; }
         public Session Session { get; set; }

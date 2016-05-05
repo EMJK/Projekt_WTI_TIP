@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNet.SignalR;
 using Microsoft.AspNet.SignalR.Hubs;
+using Ninject;
 using RegistrarChatApiClient;
 using RegistrarCommon;
 
@@ -15,18 +16,23 @@ namespace RegistrarChatApi
     {
         private readonly ISessionCache _cache;
         private readonly IList<Connection> _connections;
-        private readonly object _lock = new object();
 
         public ChatHub(ISessionCache cache)
         {
             _cache = cache;
-            _connections = new List<Connection>();
+            _connections = RegistrarSignalRServer.Kernel.Get<IList<Connection>>();
             cache.SessionExpired += Cache_SessionExpired;
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            _cache.SessionExpired -= Cache_SessionExpired;
+            base.Dispose(disposing);
         }
 
         private void Cache_SessionExpired(Session session)
         {
-            lock (_lock)
+            lock (_connections)
             {
                 var connection = _connections.FirstOrDefault(c => c.Session.SessionID == session.SessionID);
                 if (connection != null)
@@ -46,7 +52,7 @@ namespace RegistrarChatApi
 
         public override Task OnConnected()
         {
-            lock (_lock)
+            lock (_connections)
             {
                 var userID = Context.QueryString["UserID"];
                 var sessionID = Context.QueryString["SessionID"];
@@ -71,7 +77,7 @@ namespace RegistrarChatApi
 
         public override Task OnDisconnected(bool stopCalled)
         {
-            lock (_lock)
+            lock (_connections)
             {
                 var connection = _connections.FirstOrDefault(c => c.ConnectionID == Context.ConnectionId);
                 if (connection != null)
@@ -97,7 +103,7 @@ namespace RegistrarChatApi
 
         public void SendMessage(SendMessageParam param)
         {
-            lock (_lock)
+            lock (_connections)
             {
                 var session = GetSession();
                 if (session != null)
