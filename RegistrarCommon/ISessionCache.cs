@@ -4,7 +4,7 @@ namespace RegistrarCommon
 {
     public interface ISessionCache
     {
-        event Action<Session> SessionExpired;
+        event Action<Session> SessionClosed;
         void CloseSession(string sessionID);
         Session CreateSession(string userID);
         Session GetSessionByUserID(string userID);

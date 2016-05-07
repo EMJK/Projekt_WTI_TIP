@@ -31,6 +31,7 @@ namespace RegistrarWebApiClient
             var methodArg = JsonConvert.SerializeObject(invocation.Arguments[0]);
             var url = $"{_baseUrl.TrimEnd('/')}/{moduleName}/{methodName}/{methodArg}";
             var request = WebRequest.CreateHttp(url);
+            request.Timeout = 3000000;
             var response = (HttpWebResponse)request.GetResponse();
             var responseString = new StreamReader(response.GetResponseStream()).ReadToEnd();
             var responseType = typeof (Response<>).MakeGenericType(new[] {invocation.Method.ReturnType});

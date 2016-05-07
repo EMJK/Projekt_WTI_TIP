@@ -1,4 +1,6 @@
-﻿namespace RegistrarChatApiClient
+﻿using System.Threading.Tasks;
+
+namespace RegistrarChatApiClient
 {
     public interface IClientMethods
     {

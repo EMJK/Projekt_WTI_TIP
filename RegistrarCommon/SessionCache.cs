@@ -14,7 +14,7 @@ namespace RegistrarCommon
         private Timer _timer;
         private readonly List<Session> _sessions; 
         private readonly TimeSpan _sessionLifetime;
-        public event Action<Session> SessionExpired;
+        public event Action<Session> SessionClosed;
 
         public SessionCache(TimeSpan sessionLifetime)
         {
@@ -32,7 +32,7 @@ namespace RegistrarCommon
                 {
                     if (session.LastRefreshed + _sessionLifetime < now)
                     {
-                        SessionExpired?.Invoke(session);
+                        SessionClosed?.Invoke(session);
                         _sessions.Remove(session);
                     }
                     else
@@ -77,6 +77,7 @@ namespace RegistrarCommon
                 if (sessionToRemove != null)
                 {
                     _sessions.Remove(sessionToRemove);
+                    SessionClosed?.Invoke(sessionToRemove);
                 }
             }
         }

@@ -17,13 +17,13 @@ namespace RegistrarWebApi.Modules
         {
             return new RegisterAccountResponse()
             {
-                Message = $"A new account for \"{data.UserID}\" was created."
+                Message = $"A new account for \"{data.UserID.ToLower()}\" was created."
             };
         }
 
         public LoginResponse Login(LoginRequest request)
         {
-            var session = _cache.CreateSession(request.UserID);
+            var session = _cache.CreateSession(request.UserID.ToLower());
             return new LoginResponse()
             {
                 SessionID = session.SessionID

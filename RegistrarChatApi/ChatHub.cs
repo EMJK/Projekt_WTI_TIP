@@ -2,7 +2,9 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNet.SignalR;
 using Microsoft.AspNet.SignalR.Hubs;
@@ -12,113 +14,61 @@ using RegistrarCommon;
 
 namespace RegistrarChatApi
 {
-    public class ChatHub : Hub, IServerMethods
+    public class ChatHub : Hub<IClientMethods>, IServerMethods
     {
-        private readonly ISessionCache _cache;
-        private readonly IList<Connection> _connections;
+        private readonly IConnectionCache _connectionCache;
+        private readonly RegistrarSignalRServer _server;
 
-        public ChatHub(ISessionCache cache)
+        public ChatHub()
         {
-            _cache = cache;
-            _connections = RegistrarSignalRServer.Kernel.Get<IList<Connection>>();
-            cache.SessionExpired += Cache_SessionExpired;
+            _connectionCache = RegistrarSignalRServer.Kernel.Get<IConnectionCache>();
+            _server = RegistrarSignalRServer.Kernel.Get<RegistrarSignalRServer>();
         }
 
-        protected override void Dispose(bool disposing)
+        private Connection GetCurrentConnection()
         {
-            _cache.SessionExpired -= Cache_SessionExpired;
-            base.Dispose(disposing);
-        }
-
-        private void Cache_SessionExpired(Session session)
-        {
-            lock (_connections)
+            return new Connection()
             {
-                var connection = _connections.FirstOrDefault(c => c.Session.SessionID == session.SessionID);
-                if (connection != null)
-                {
-                    _connections.Remove(connection);
-                    SendClientList();
-                }
-            }
-        }
-
-        private Session GetSession()
-        {
-            var con = _connections.FirstOrDefault(x => x.ConnectionID == Context.ConnectionId);
-            if (con == null) return null;
-            return _cache.GetSessionBySessionID(con.Session.SessionID);
-        }
-
-        public override Task OnConnected()
-        {
-            lock (_connections)
-            {
-                var userID = Context.QueryString["UserID"];
-                var sessionID = Context.QueryString["SessionID"];
-                if (_cache.VerifySession(userID, sessionID))
-                {
-                    var session = _cache.GetSessionBySessionID(sessionID);
-                    _connections.Add(new Connection()
-                    {
-                        ConnectionID = Context.ConnectionId,
-                        Session = session
-                    });
-                    SendClientList();
-                }
-            }
-            return base.OnConnected();
-        }
-
-        public override Task OnReconnected()
-        {
-            return OnConnected();
-        }
-
-        public override Task OnDisconnected(bool stopCalled)
-        {
-            lock (_connections)
-            {
-                var connection = _connections.FirstOrDefault(c => c.ConnectionID == Context.ConnectionId);
-                if (connection != null)
-                {
-                    _connections.Remove(connection);
-                    SendClientList();
-                }
-            }
-            return base.OnDisconnected(stopCalled);
-        }
-
-        private void SendClientList()
-        {
-            var msg = new ClientListParam()
-            {
-                Clients = _connections.Select(x => x.Session.UserID).ToList()
+                ConnectionID = Context.ConnectionId,
+                SessionID = Context.QueryString.Get("SessionID")?.ToString().ToLower() ?? string.Empty,
+                UserID = Context.QueryString.Get("UserID")?.ToString().ToLower() ?? string.Empty
             };
-            foreach (var connection in _connections)
-            {
-                Clients.Client(connection.ConnectionID).ClientList(msg);
-            }
+        }
+
+        public override async Task OnConnected()
+        {
+            _connectionCache.Verify(GetCurrentConnection());
+            await base.OnConnected();
+
+            _server.SendClientList();
+        }
+
+        public override async Task OnReconnected()
+        {
+            _connectionCache.Verify(GetCurrentConnection());
+            await base.OnReconnected();
+            _server.SendClientList();
+        }
+
+        public override async Task OnDisconnected(bool stopCalled)
+        {
+            _connectionCache.RemoveConnectionForConnectionID(Context.ConnectionId);
+            await base.OnDisconnected(stopCalled);
+            _server.SendClientList();
         }
 
         public void SendMessage(SendMessageParam param)
         {
-            lock (_connections)
+            var dst = _connectionCache.GetConnectionIDForUser(param.DestinationUserID);
+            var con = GetCurrentConnection();
+            if (_connectionCache.Verify(con) && dst != null)
             {
-                var session = GetSession();
-                if (session != null)
+                var msg = new MessageParam()
                 {
-                    var destinationConnectionID = _connections.FirstOrDefault(x => x.Session.UserID == param.DestinationUserID)?.ConnectionID;
-                    if (destinationConnectionID != null)
-                    {
-                        var msg = new MessageParam()
-                        {
-                            SenderUserID = session.UserID,
-                            Message = param.Message
-                        };
-                        Clients.Client(destinationConnectionID).Message(msg);
-                    }
-                }
+                    Message = param.Message,
+                    SenderUserID = con.UserID
+                };
+                Clients.Client(dst).Message(msg);
             }
         }
     }

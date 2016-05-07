@@ -91,11 +91,13 @@
   <ItemGroup>
     <Compile Include="ChatHub.cs" />
     <Compile Include="Connection.cs" />
-    <Compile Include="NinjectDependencyResolver.cs" />
+    <Compile Include="ConnectionCache.cs" />
+    <Compile Include="IConnectionCache.cs" />
     <Compile Include="RegistrarSignalRServer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

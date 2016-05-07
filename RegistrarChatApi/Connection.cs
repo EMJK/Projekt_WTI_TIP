@@ -1,15 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using RegistrarCommon;
 
 namespace RegistrarChatApi
 {
     public class Connection
     {
+        private readonly object _lock = new object();
         public string ConnectionID { get; set; }
-        public Session Session { get; set; }
+        public string UserID { get; set; }
+        public string SessionID { get; set; }
     }
 }

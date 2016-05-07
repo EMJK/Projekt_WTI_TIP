@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Castle.Core.Internal;
 using Castle.DynamicProxy;
 using Microsoft.AspNet.SignalR.Client;
 using RegistrarCommon;
@@ -12,10 +13,13 @@ namespace RegistrarChatApiClient
 {
     public class ChatApiClient : IDisposable
     {
-        public IServerMethods Server { get; }
-        private readonly Action _dispose;
+        private string _conID;
+        private readonly HubConnection _connection;
+        public IHubProxy<IServerMethods, IClientMethods> Hub { get; }
 
-        public ChatApiClient(string baseUrl, string userID, string sessionID, IClientMethods client)
+
+
+        public ChatApiClient(string baseUrl, string userID, string sessionID)
         {
             var queryString = new Dictionary<string, string>
             {
@@ -23,48 +27,21 @@ namespace RegistrarChatApiClient
                 [nameof(sessionID)] = sessionID
             };
 
-            var connection = new HubConnection(baseUrl, queryString);
-            var proxy = connection.CreateHubProxy("ChatHub");
-            Server = new ProxyGenerator().CreateInterfaceProxyWithoutTarget<IServerMethods>(
-                new SignalRInterceptor(proxy));
-            var binding = BindClient(proxy, client);
-            _dispose = () =>
+            _connection = new HubConnection(baseUrl, queryString);
+            Hub = _connection.CreateHubProxy<IServerMethods, IClientMethods>("ChatHub");
+            _connection.StateChanged += change =>
             {
-                binding.Dispose();
-                connection.Dispose();
+                var newID = _connection.ConnectionId;
+                if (!newID.IsNullOrEmpty() && _conID != newID)
+                {
+                    _conID = newID;
+                }
             };
 
-            connection.Start().Wait();
+            _connection.Start().Wait();
         }
 
-        private IDisposable BindClient(IHubProxy proxy, IClientMethods client)
-        {
-            var methods = typeof (IClientMethods)
-                .GetMethods(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Public);
-            var genericHandler = typeof (HubProxyExtensions)
-                .GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.DeclaredOnly)
-                .Single(m => m.Name == "On"
-                            && m.IsGenericMethodDefinition
-                            && m.GetGenericArguments().Length == 1
-                            && m.GetParameters().Length == 3);
-            var disposables = new List<IDisposable>();
-            foreach (var method in methods)
-            {
-                var targetMethodParamType = GetParamType(method);
-                var targetMethodDelegate = GetTargetMethodDelegate(method, client);
-                var binderMethod = genericHandler.MakeGenericMethod(targetMethodParamType);
-                var disposable = binderMethod.Invoke(null, new[] { proxy, method.Name, targetMethodDelegate });
-                disposables.Add((IDisposable)disposable);
-            }
-            disposables.Reverse();
-            return Disposable.Create(() =>
-            {
-                foreach (var disposable in disposables)
-                {
-                    disposable.Dispose();
-                }
-            });
-        }
+        
 
         private Type GetParamType(MethodInfo method)
         {
@@ -73,32 +50,10 @@ namespace RegistrarChatApiClient
             return targetParams[0].ParameterType;
         }
 
-        private object GetTargetMethodDelegate(MethodInfo method, IClientMethods client)
-        {
-            var paramType = method.GetParameters()[0].ParameterType;
-            return Delegate.CreateDelegate(
-                typeof (Action<>).MakeGenericType(new[] { paramType }),
-                client,
-                method);
-        }
-
         public void Dispose()
         {
-            _dispose?.Invoke();
-        }
-    }
-
-    public class SignalRInterceptor : IInterceptor
-    {
-        private readonly IHubProxy _proxy;
-        public SignalRInterceptor(IHubProxy proxy)
-        {
-            _proxy = proxy;
-        }
-
-        public void Intercept(IInvocation invocation)
-        {
-            _proxy.Invoke(invocation.Method.Name, invocation.Arguments).Wait();
+            Hub.Dispose();
+            _connection.Dispose();
         }
     }
 }
