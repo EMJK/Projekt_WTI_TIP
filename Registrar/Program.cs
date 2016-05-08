@@ -27,11 +27,14 @@ namespace Registrar
             var webApiUri = $"http://{host}:{webApiPort}/";
             var chatApiUri = $"http://{host}:{chatApiPort}/";
 
+            var sipserver = new RegistrarSipServer(5060, "10.0.0.4");
+
             var kernel = GetNinjectKernel();
 
+            sipserver.Start();
             using (new RegistrarHttpServer(webApiUri, kernel))
             using (new RegistrarSignalRServer(chatApiUri, kernel))
-            using (new RegistrarSipServer(host, sipPort, kernel))
+            //using (new RegistrarSipServer(host, sipPort, kernel))
             {
                 Console.ReadLine();
             }

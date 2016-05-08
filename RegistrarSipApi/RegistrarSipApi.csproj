@@ -43,6 +43,9 @@
       <HintPath>..\packages\Ninject.3.2.2.0\lib\net45-full\Ninject.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Npgsql">
+      <HintPath>lib\Npgsql.dll</HintPath>
+    </Reference>
     <Reference Include="SIPSorcery.Net, Version=1.5.0.35789, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\SIPSorcery.1.5.5\lib\net46\SIPSorcery.Net.dll</HintPath>
       <Private>True</Private>
