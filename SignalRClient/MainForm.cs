@@ -19,8 +19,7 @@ namespace SignalRClient
 
         private void MainForm_Load(object sender, EventArgs e)
         {
-            chatCtrl1.SetUserUserIDs("User1", "User2");
-            chatCtrl2.SetUserUserIDs("User2", "User1");
+
         }
     }
 }

@@ -4,6 +4,7 @@ using System.Text;
 using Julas.Utils;
 using Julas.Utils.Extensions;
 using Npgsql;
+using NpgsqlTypes;
 using RegistrarCommon;
 using RegistrarWebApiClient;
 using RegistrarWebApiClient.Interfaces;
@@ -30,8 +31,8 @@ namespace RegistrarWebApi.Modules
             using (var cmd = _connection.CreateCommand())
             {
                 cmd.CommandText = "INSERT INTO users (username, password_hash) VALUES (@username, @password_hash);";
-                cmd.Parameters.AddWithValue("@username", request.UserID?.ToLower().IfNullThenDBNull());
-                cmd.Parameters.AddWithValue("@password_hash", passwordHash);
+                cmd.Parameters.AddWithValue("@username", NpgsqlDbType.Text, request.UserID?.ToLower().IfNullThenDBNull());
+                cmd.Parameters.AddWithValue("@password_hash", NpgsqlDbType.Text, passwordHash);
                 cmd.ExecuteNonQuery();
             }
             return new CreateAccountResponse()
@@ -48,7 +49,7 @@ namespace RegistrarWebApi.Modules
             using (var cmd = _connection.CreateCommand())
             {
                 cmd.CommandText = "SELECT password_hash FROM users WHERE username = @userName";
-                cmd.Parameters.AddWithValue("@userName", request?.UserID?.ToLower().IfNullThenDBNull());
+                cmd.Parameters.AddWithValue("@userName", NpgsqlDbType.Text, request?.UserID?.ToLower().IfNullThenDBNull());
                 dbHash = (string)cmd.ExecuteScalar();
             }
             if (dbHash != passwordHash)
@@ -77,9 +78,9 @@ namespace RegistrarWebApi.Modules
             using (var cmd = _connection.CreateCommand())
             {
                 cmd.CommandText = "UPDATE users SET password_hash = @newPasswordHash WHERE username = @userName AND password_hash = @oldPasswordHash;";
-                cmd.Parameters.AddWithValue("@userName", request?.UserID?.ToLower().IfNullThenDBNull());
-                cmd.Parameters.AddWithValue("@oldPasswordHash", oldPasswordHash);
-                cmd.Parameters.AddWithValue("@newPasswordHash", newPasswordHash);
+                cmd.Parameters.AddWithValue("@userName", NpgsqlDbType.Text, request?.UserID?.ToLower().IfNullThenDBNull());
+                cmd.Parameters.AddWithValue("@oldPasswordHash", NpgsqlDbType.Text, oldPasswordHash);
+                cmd.Parameters.AddWithValue("@newPasswordHash", NpgsqlDbType.Text, newPasswordHash);
                 if (cmd.ExecuteNonQuery() == 0)
                 {
                     throw new WebApiException(401, "Invalid username or password.");

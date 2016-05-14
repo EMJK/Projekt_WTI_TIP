@@ -61,6 +61,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CreateAccountDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CreateAccountDialog.Designer.cs">
+      <DependentUpon>CreateAccountDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ChangePasswordDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ChangePasswordDialog.Designer.cs">
+      <DependentUpon>ChangePasswordDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="ChatCtrl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -99,6 +111,12 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="CreateAccountDialog.resx">
+      <DependentUpon>CreateAccountDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ChangePasswordDialog.resx">
+      <DependentUpon>ChangePasswordDialog.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="ChatCtrl.resx">
       <DependentUpon>ChatCtrl.cs</DependentUpon>
     </EmbeddedResource>

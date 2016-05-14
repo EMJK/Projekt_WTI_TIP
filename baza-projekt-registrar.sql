@@ -1,6 +1,6 @@
-﻿DROP TABLE registrar_table;
-DROP TABLE billing;
-DROP TABLE users;
+﻿DROP TABLE IF EXISTS registrar_table;
+DROP TABLE IF EXISTS billing;
+DROP TABLE IF EXISTS users;
 
 
 CREATE TABLE users (
