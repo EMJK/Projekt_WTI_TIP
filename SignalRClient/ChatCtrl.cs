@@ -39,15 +39,14 @@ namespace SignalRClient
                 });
                 _chatApiClient.Hub.SubscribeOn<ClientListParam>(c => c.ClientList, msg =>
                 {
-                    
-                    AppendLine($"[CHAT] Clients: {msg.Clients.Aggregate((a, b) => $"{a}, {b}")}");
+                    FillUserList(msg.Clients);
                 });
 
                 SetControlsToLoginState(true);
             }
-            catch (Exception ex)
+            catch (WebApiException ex)
             {
-                AppendLine($"[HTTP] Could not log in: {ex.Message}");
+                AppendLine($"[HTTP] Could not log in: {ex.ResponseCode} {ex.ResponseMessage}");
             }
         }
 
@@ -71,9 +70,9 @@ namespace SignalRClient
                 AppendLine($"[HTTP] User `{tbUserID.Text}` logged out.");
                 SetControlsToLoginState(false);
             }
-            catch (Exception ex)
+            catch (WebApiException ex)
             {
-                AppendLine($"[HTTP] Could not log out: {ex.Message}");
+                AppendLine($"[HTTP] Could not log out: {ex.ResponseCode} {ex.ResponseMessage}");
             }
 
             tbPassword.Clear();
@@ -84,7 +83,7 @@ namespace SignalRClient
 
         private void btnSend_Click(object sender, EventArgs e)
         {
-            if (lbOtherUsers.SelectedItem == null) return;
+            if (lbOtherUsers.SelectedItem == null || lbOtherUsers.SelectedItem.ToString().ToLower() == tbUserID.Text.ToLower()) return;
             AppendLine($"[CHAT] To {tbUserID.Text}: {tbInput.Text}");
             _chatApiClient.Hub.Call(srv => srv.SendMessage(new SendMessageParam()
             {
@@ -116,7 +115,12 @@ namespace SignalRClient
             {
                 var selected = (string)lbOtherUsers.SelectedItem;
                 lbOtherUsers.Items.Clear();
-                lbOtherUsers.Items.AddRange(users.Select(u => u.ToLower()).OrderBy(u => u).Cast<object>().ToArray());
+                lbOtherUsers.Items.AddRange(users
+                    .Select(u => u.ToLower())
+                    .Where(u => u != tbUserID.Text.ToLower())
+                    .OrderBy(u => u)
+                    .Cast<object>()
+                    .ToArray());
                 if (lbOtherUsers.Items.Cast<string>().Contains(selected))
                 {
                     lbOtherUsers.SelectedItem = selected;
@@ -146,11 +150,11 @@ namespace SignalRClient
                         SessionID = tbSessionID.Text,
                         UserID = tbUserID.Text
                     });
-                    AppendLine($"[HTTP] Your password has been changed.");
+                    AppendLine("[HTTP] Your password has been changed.");
                 }
-                catch (Exception ex)
+                catch (WebApiException ex)
                 {
-                    AppendLine($"[HTTP] Failed to change password: {ex.Message}");
+                    AppendLine($"[HTTP] Failed to change password: {ex.ResponseCode} {ex.ResponseMessage}");
                 }
             }
         }
@@ -169,11 +173,16 @@ namespace SignalRClient
                     });
                     AppendLine($"[HTTP] New account has been created for user `{form.UserName}`.");
                 }
-                catch (Exception ex)
+                catch (WebApiException ex)
                 {
-                    AppendLine($"[HTTP] Failed to create account for user `{form.UserName}`: {ex.Message}");
+                    AppendLine($"[HTTP] Failed to create account for user `{form.UserName}`: {ex.ResponseCode} {ex.ResponseMessage}");
                 }
             }
+        }
+
+        private void tbInput_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Return) btnSend_Click(null, e);
         }
     }
 }

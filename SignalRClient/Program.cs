@@ -27,7 +27,12 @@ namespace SignalRClient
             //player.PlayAudioPacketStream(0, stream);
             //Console.ReadLine();
             //return;
-            Application.Run(new MainForm());
+            var tasks = new List<Task>();
+            for (int i = 0; i < 3; i++)
+            {
+                tasks.Add(Task.Factory.StartNew(() => Application.Run(new MainForm())));
+            }
+            Task.WaitAll(tasks.ToArray());
         }
     }
 }

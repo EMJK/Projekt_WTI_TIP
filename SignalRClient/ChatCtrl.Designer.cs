@@ -57,6 +57,7 @@
             this.btnLogin.Name = "btnLogin";
             this.btnLogin.Size = new System.Drawing.Size(75, 23);
             this.btnLogin.TabIndex = 0;
+            this.btnLogin.TabStop = false;
             this.btnLogin.Text = "Login";
             this.btnLogin.UseVisualStyleBackColor = true;
             this.btnLogin.Click += new System.EventHandler(this.btnLogin_Click);
@@ -69,6 +70,7 @@
             this.tbSessionID.ReadOnly = true;
             this.tbSessionID.Size = new System.Drawing.Size(515, 20);
             this.tbSessionID.TabIndex = 1;
+            this.tbSessionID.TabStop = false;
             // 
             // tbInput
             // 
@@ -79,6 +81,8 @@
             this.tbInput.Name = "tbInput";
             this.tbInput.Size = new System.Drawing.Size(306, 20);
             this.tbInput.TabIndex = 1;
+            this.tbInput.TabStop = false;
+            this.tbInput.KeyDown += new System.Windows.Forms.KeyEventHandler(this.tbInput_KeyDown);
             // 
             // groupBox1
             // 
@@ -107,6 +111,7 @@
             this.tbOutput.ReadOnly = true;
             this.tbOutput.Size = new System.Drawing.Size(387, 330);
             this.tbOutput.TabIndex = 0;
+            this.tbOutput.TabStop = false;
             // 
             // btnSend
             // 
@@ -116,6 +121,7 @@
             this.btnSend.Name = "btnSend";
             this.btnSend.Size = new System.Drawing.Size(75, 20);
             this.btnSend.TabIndex = 0;
+            this.btnSend.TabStop = false;
             this.btnSend.Text = "Send";
             this.btnSend.UseVisualStyleBackColor = true;
             this.btnSend.Click += new System.EventHandler(this.btnSend_Click);
@@ -151,6 +157,7 @@
             this.tbUserID.Name = "tbUserID";
             this.tbUserID.Size = new System.Drawing.Size(515, 20);
             this.tbUserID.TabIndex = 1;
+            this.tbUserID.TabStop = false;
             // 
             // btnLogout
             // 
@@ -159,6 +166,7 @@
             this.btnLogout.Name = "btnLogout";
             this.btnLogout.Size = new System.Drawing.Size(75, 23);
             this.btnLogout.TabIndex = 0;
+            this.btnLogout.TabStop = false;
             this.btnLogout.Text = "Logout";
             this.btnLogout.UseVisualStyleBackColor = true;
             this.btnLogout.Click += new System.EventHandler(this.btnLogout_Click);
@@ -182,7 +190,8 @@
             this.tbPassword.Name = "tbPassword";
             this.tbPassword.PasswordChar = '•';
             this.tbPassword.Size = new System.Drawing.Size(515, 20);
-            this.tbPassword.TabIndex = 1;
+            this.tbPassword.TabIndex = 2;
+            this.tbPassword.TabStop = false;
             // 
             // btnChangePassword
             // 
@@ -191,6 +200,7 @@
             this.btnChangePassword.Name = "btnChangePassword";
             this.btnChangePassword.Size = new System.Drawing.Size(111, 23);
             this.btnChangePassword.TabIndex = 0;
+            this.btnChangePassword.TabStop = false;
             this.btnChangePassword.Text = "Change Password";
             this.btnChangePassword.UseVisualStyleBackColor = true;
             this.btnChangePassword.Click += new System.EventHandler(this.btnChangePassword_Click);
@@ -202,6 +212,7 @@
             this.btnCreateAccount.Name = "btnCreateAccount";
             this.btnCreateAccount.Size = new System.Drawing.Size(123, 23);
             this.btnCreateAccount.TabIndex = 0;
+            this.btnCreateAccount.TabStop = false;
             this.btnCreateAccount.Text = "Create New Account";
             this.btnCreateAccount.UseVisualStyleBackColor = true;
             this.btnCreateAccount.Click += new System.EventHandler(this.btnCreateAccount_Click);
@@ -226,6 +237,7 @@
             this.lbOtherUsers.Name = "lbOtherUsers";
             this.lbOtherUsers.Size = new System.Drawing.Size(107, 311);
             this.lbOtherUsers.TabIndex = 4;
+            this.lbOtherUsers.TabStop = false;
             // 
             // ChatCtrl
             // 

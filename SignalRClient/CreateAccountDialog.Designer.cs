@@ -41,7 +41,7 @@
             this.btnCancel.Location = new System.Drawing.Point(206, 59);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(75, 23);
-            this.btnCancel.TabIndex = 0;
+            this.btnCancel.TabIndex = 4;
             this.btnCancel.Text = "Cancel";
             this.btnCancel.UseVisualStyleBackColor = true;
             this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
@@ -51,7 +51,7 @@
             this.btnOK.Location = new System.Drawing.Point(125, 59);
             this.btnOK.Name = "btnOK";
             this.btnOK.Size = new System.Drawing.Size(75, 23);
-            this.btnOK.TabIndex = 0;
+            this.btnOK.TabIndex = 3;
             this.btnOK.Text = "OK";
             this.btnOK.UseVisualStyleBackColor = true;
             this.btnOK.Click += new System.EventHandler(this.btnOK_Click);
@@ -62,7 +62,7 @@
             this.tbPassword.Name = "tbPassword";
             this.tbPassword.PasswordChar = '•';
             this.tbPassword.Size = new System.Drawing.Size(187, 20);
-            this.tbPassword.TabIndex = 1;
+            this.tbPassword.TabIndex = 2;
             // 
             // tbUserName
             // 
