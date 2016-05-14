@@ -4,13 +4,13 @@ namespace RegistrarWebApiClient
 {
     public class WebApiException : Exception
     {
-        private int responseCode;
-        private string responseMessage;
+        public int ResponseCode { get; }
+        public string ResponseMessage { get; }
 
         public WebApiException(int responseCode, string responseMessage)
         {
-            this.responseCode = responseCode;
-            this.responseMessage = responseMessage;
+            this.ResponseCode = responseCode;
+            this.ResponseMessage = responseMessage;
         }
     }
 }

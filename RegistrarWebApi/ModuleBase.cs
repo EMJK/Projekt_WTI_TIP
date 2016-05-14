@@ -52,7 +52,16 @@ namespace RegistrarWebApi
             }
             catch (Exception ex)
             {
-                returnValue = Activator.CreateInstance(returnType, 500, ex.ToString(), GetEmptyBody(method.ReturnType));
+                ex = ex.InnerException;
+                var ex1 = ex as WebApiException;
+                if (ex1 != null)
+                {
+                    returnValue = Activator.CreateInstance(returnType, ex1.ResponseCode, ex1.ResponseMessage, null);
+                }
+                else
+                {
+                    returnValue = Activator.CreateInstance(returnType, 500, ex.Message, null);
+                }
             }
             return JsonConvert.SerializeObject(returnValue, SerializerSettings);
         }

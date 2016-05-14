@@ -48,13 +48,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Models\Account\ChangePasswordRequest.cs" />
+    <Compile Include="Models\Account\ChangePasswordResponse.cs" />
     <Compile Include="Interfaces\IAccount.cs" />
     <Compile Include="Models\Account\LoginRequest.cs" />
     <Compile Include="Models\Account\LoginResponse.cs" />
     <Compile Include="Models\Account\LogoutRequest.cs" />
     <Compile Include="Models\Account\LogoutResponse.cs" />
-    <Compile Include="Models\Account\RegisterAccountRequest.cs" />
-    <Compile Include="Models\Account\RegisterAccountResponse.cs" />
+    <Compile Include="Models\Account\CreateAccountRequest.cs" />
+    <Compile Include="Models\Account\CreateAccountResponse.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RequestInterceptor.cs" />
     <Compile Include="Response.cs" />

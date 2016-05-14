@@ -4,8 +4,9 @@ namespace RegistrarWebApiClient.Interfaces
 {
     public interface IAccount
     {
-        RegisterAccountResponse Register(RegisterAccountRequest data);
+        CreateAccountResponse CreateAccount(CreateAccountRequest request);
         LoginResponse Login(LoginRequest request);
         LogoutResponse Logout(LogoutRequest request);
+        ChangePasswordResponse ChangePassword(ChangePasswordRequest request);
     }
 }

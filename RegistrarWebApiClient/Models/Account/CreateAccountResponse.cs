@@ -1,6 +1,6 @@
 ﻿namespace RegistrarWebApiClient.Models.Account
 {
-    public class RegisterAccountResponse
+    public class CreateAccountResponse
     {
         public string Message { get; set; }
     }

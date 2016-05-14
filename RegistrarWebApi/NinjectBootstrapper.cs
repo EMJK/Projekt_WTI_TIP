@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Nancy;
 using Nancy.Bootstrappers.Ninject;
 using Ninject;
+using Npgsql;
 
 namespace RegistrarWebApi
 {
@@ -25,7 +27,10 @@ namespace RegistrarWebApi
 
         protected override void ConfigureRequestContainer(IKernel container, NancyContext context)
         {
-            //tutaj robimy dbconnection
+            var connectionString = ConfigurationManager.AppSettings["ConnectionString"];
+            var connection = new NpgsqlConnection(connectionString);
+            connection.Open();
+            container.Bind<NpgsqlConnection>().ToConstant(connection).InSingletonScope();
         }
     }
 }
