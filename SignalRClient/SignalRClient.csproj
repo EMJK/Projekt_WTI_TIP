@@ -81,6 +81,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Audio\Audio.csproj">
+      <Project>{906ee480-a1cb-4bc0-8272-5e977ac26190}</Project>
+      <Name>Audio</Name>
+    </ProjectReference>
     <ProjectReference Include="..\RegistrarChatApiClient\RegistrarChatApiClient.csproj">
       <Project>{6A733F41-9EBA-4F2D-AD95-FD1FDE3210F7}</Project>
       <Name>RegistrarChatApiClient</Name>
