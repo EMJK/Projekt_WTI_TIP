@@ -12,7 +12,7 @@ CREATE TABLE users (
     status character(1) DEFAULT 'A'::bpchar NOT NULL
 );
 ALTER TABLE users ADD PRIMARY KEY (id);
-ALTER TABLE users COMMENT ON COLUMN
+ALTER TABLE public.users ADD CONSTRAINT users_username_uq UNIQUE (username);
 
 
 CREATE TABLE billing (
