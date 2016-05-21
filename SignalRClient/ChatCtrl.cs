@@ -184,5 +184,15 @@ namespace SignalRClient
         {
             if (e.KeyCode == Keys.Return) btnSend_Click(null, e);
         }
+
+        private void tbUserID_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Return) btnLogin_Click(null, e);
+        }
+
+        private void tbPassword_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Return) btnLogin_Click(null, e);
+        }
     }
 }

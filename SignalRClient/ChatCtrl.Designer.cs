@@ -81,7 +81,6 @@
             this.tbInput.Name = "tbInput";
             this.tbInput.Size = new System.Drawing.Size(306, 20);
             this.tbInput.TabIndex = 1;
-            this.tbInput.TabStop = false;
             this.tbInput.KeyDown += new System.Windows.Forms.KeyEventHandler(this.tbInput_KeyDown);
             // 
             // groupBox1
@@ -157,7 +156,7 @@
             this.tbUserID.Name = "tbUserID";
             this.tbUserID.Size = new System.Drawing.Size(515, 20);
             this.tbUserID.TabIndex = 1;
-            this.tbUserID.TabStop = false;
+            this.tbUserID.KeyDown += new System.Windows.Forms.KeyEventHandler(this.tbUserID_KeyDown);
             // 
             // btnLogout
             // 
@@ -191,7 +190,7 @@
             this.tbPassword.PasswordChar = '•';
             this.tbPassword.Size = new System.Drawing.Size(515, 20);
             this.tbPassword.TabIndex = 2;
-            this.tbPassword.TabStop = false;
+            this.tbPassword.KeyDown += new System.Windows.Forms.KeyEventHandler(this.tbPassword_KeyDown);
             // 
             // btnChangePassword
             // 
