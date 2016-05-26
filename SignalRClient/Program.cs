@@ -6,12 +6,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Audio;
+using Julas.Utils;
 using Microsoft.AspNet.SignalR.Client;
 using RegistrarChatApiClient;
 using RegistrarWebApiClient;
 using RegistrarWebApiClient.Models.Account;
 
-namespace SignalRClient
+namespace Client
 {
     class Program
     {
@@ -27,12 +28,10 @@ namespace SignalRClient
             //player.PlayAudioPacketStream(0, stream);
             //Console.ReadLine();
             //return;
-            var tasks = new List<Task>();
-            for (int i = 0; i < 3; i++)
-            {
-                tasks.Add(Task.Factory.StartNew(() => Application.Run(new MainForm())));
-            }
-            Task.WaitAll(tasks.ToArray());
+            Task.WaitAll(
+                Enumerable.Range(1, 3)
+                    .Select(x => Task.Factory.StartNew(() => Application.Run(new MainForm())))
+                    .ToArray());
         }
     }
 }

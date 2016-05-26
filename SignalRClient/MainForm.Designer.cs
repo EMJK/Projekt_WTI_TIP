@@ -1,4 +1,4 @@
-﻿namespace SignalRClient
+﻿namespace Client
 {
     partial class MainForm
     {
@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.chatCtrl1 = new SignalRClient.ChatCtrl();
+            this.chatCtrl1 = new ChatCtrl();
             this.SuspendLayout();
             // 
             // chatCtrl1

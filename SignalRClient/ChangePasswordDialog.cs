@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace SignalRClient
+namespace Client
 {
     public partial class ChangePasswordDialog : Form
     {

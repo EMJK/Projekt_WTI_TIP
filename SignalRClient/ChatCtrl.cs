@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
@@ -11,18 +12,20 @@ using RegistrarChatApiClient;
 using RegistrarWebApiClient;
 using RegistrarWebApiClient.Models.Account;
 
-namespace SignalRClient
+namespace Client
 {
     public partial class ChatCtrl : UserControl
     {
         private WebApiClient _webApiClient;
         private ChatApiClient _chatApiClient;
+        private ConcurrentDictionary<string, ConversationForm> _forms; 
 
         public ChatCtrl()
         {
             InitializeComponent();
             SetControlsToLoginState(false);
             _webApiClient = new WebApiClient("http://localhost:9922/");
+            _forms = new ConcurrentDictionary<string, ConversationForm>();
         }
 
         private void btnLogin_Click(object sender, EventArgs e)
@@ -30,23 +33,27 @@ namespace SignalRClient
             try
             {
                 var response = _webApiClient.Account.Login(new LoginRequest() { UserID = tbUserID.Text, Password = tbPassword.Text});
-                AppendLine($"[HTTP] User `{tbUserID.Text}` logged in.");
+                AppendLine($"User `{tbUserID.Text}` logged in.");
                 tbSessionID.Text = response.SessionID;
                 _chatApiClient = new ChatApiClient("http://localhost:9923/", tbUserID.Text, response.SessionID);
                 _chatApiClient.Hub.SubscribeOn<MessageParam>(c => c.Message, msg =>
                 {
-                    AppendLine($"[CHAT] From {msg.SenderUserID}: {msg.Message}");
+                    Invoke(() =>
+                    {
+                        ConversationForm form = StartConversation(msg.SenderUserID);
+                        form.AppendMessageFromOtherUser(msg.Message);
+                    });
                 });
                 _chatApiClient.Hub.SubscribeOn<ClientListParam>(c => c.ClientList, msg =>
                 {
-                    FillUserList(msg.Clients);
+                    Invoke(() => FillUserList(msg.Clients));
                 });
 
                 SetControlsToLoginState(true);
             }
             catch (WebApiException ex)
             {
-                AppendLine($"[HTTP] Could not log in: {ex.ResponseCode} {ex.ResponseMessage}");
+                AppendLine($"Could not log in: {ex.ResponseCode} {ex.ResponseMessage}");
             }
         }
 
@@ -54,11 +61,9 @@ namespace SignalRClient
         {
             tbUserID.ReadOnly = isLoggedIn;
             tbPassword.ReadOnly = isLoggedIn;
-            tbInput.Enabled = isLoggedIn;
             btnLogin.Enabled = !isLoggedIn;
             btnLogout.Enabled = isLoggedIn;
             btnChangePassword.Enabled = isLoggedIn;
-            btnSend.Enabled = isLoggedIn;
             lbOtherUsers.Enabled = isLoggedIn;
         }
 
@@ -67,51 +72,22 @@ namespace SignalRClient
             try
             {
                 _webApiClient.Account.Logout(new LogoutRequest() {SessionID = tbSessionID.Text});
-                AppendLine($"[HTTP] User `{tbUserID.Text}` logged out.");
+                //AppendLine($"User `{tbUserID.Text}` logged out.");
                 SetControlsToLoginState(false);
+                tbPassword.Clear();
+                tbSessionID.Clear();
+                lbOtherUsers.Items.Clear();
+                tbLog.Clear();
             }
             catch (WebApiException ex)
             {
-                AppendLine($"[HTTP] Could not log out: {ex.ResponseCode} {ex.ResponseMessage}");
-            }
-
-            tbPassword.Clear();
-            tbSessionID.Clear();
-            tbInput.Clear();
-            lbOtherUsers.Items.Clear();
-        }
-
-        private void btnSend_Click(object sender, EventArgs e)
-        {
-            if (lbOtherUsers.SelectedItem == null || lbOtherUsers.SelectedItem.ToString().ToLower() == tbUserID.Text.ToLower()) return;
-            AppendLine($"[CHAT] To {tbUserID.Text}: {tbInput.Text}");
-            _chatApiClient.Hub.Call(srv => srv.SendMessage(new SendMessageParam()
-            {
-                Message = tbInput.Text,
-                DestinationUserID = (string)lbOtherUsers.SelectedItem
-            }));
-            tbInput.Clear();
-        }
-
-        private void AppendLine(string str)
-        {
-            Action action = () =>
-            {
-                tbOutput.Text += $"{str}{Environment.NewLine}";
-            };
-            if (this.InvokeRequired)
-            {
-                this.Invoke(action);
-            }
-            else
-            {
-                action();
+                AppendLine($"Could not log out: {ex.ResponseCode} {ex.ResponseMessage}");
             }
         }
 
         private void FillUserList(IEnumerable<string> users)
         {
-            Action action = () =>
+            Invoke(() =>
             {
                 var selected = (string)lbOtherUsers.SelectedItem;
                 lbOtherUsers.Items.Clear();
@@ -125,15 +101,7 @@ namespace SignalRClient
                 {
                     lbOtherUsers.SelectedItem = selected;
                 }
-            };
-            if (this.InvokeRequired)
-            {
-                this.Invoke(action);
-            }
-            else
-            {
-                action();
-            }
+            });
         }
 
         private void btnChangePassword_Click(object sender, EventArgs e)
@@ -150,11 +118,11 @@ namespace SignalRClient
                         SessionID = tbSessionID.Text,
                         UserID = tbUserID.Text
                     });
-                    AppendLine("[HTTP] Your password has been changed.");
+                    AppendLine("Your password has been changed.");
                 }
                 catch (WebApiException ex)
                 {
-                    AppendLine($"[HTTP] Failed to change password: {ex.ResponseCode} {ex.ResponseMessage}");
+                    AppendLine($"Failed to change password: {ex.ResponseCode} {ex.ResponseMessage}");
                 }
             }
         }
@@ -171,18 +139,19 @@ namespace SignalRClient
                         UserID = form.UserName,
                         Password = form.Password
                     });
-                    AppendLine($"[HTTP] New account has been created for user `{form.UserName}`.");
+                    AppendLine($"New account has been created for user `{form.UserName}`.");
                 }
                 catch (WebApiException ex)
                 {
-                    AppendLine($"[HTTP] Failed to create account for user `{form.UserName}`: {ex.ResponseCode} {ex.ResponseMessage}");
+                    AppendLine($"Failed to create account for user `{form.UserName}`: {ex.ResponseCode} {ex.ResponseMessage}");
                 }
             }
         }
 
-        private void tbInput_KeyDown(object sender, KeyEventArgs e)
+        private void AppendLine(string str)
         {
-            if (e.KeyCode == Keys.Return) btnSend_Click(null, e);
+            tbLog.AppendText($"{str}{Environment.NewLine}");
+            tbLog.ScrollToCaret();
         }
 
         private void tbUserID_KeyDown(object sender, KeyEventArgs e)
@@ -193,6 +162,51 @@ namespace SignalRClient
         private void tbPassword_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Return) btnLogin_Click(null, e);
+        }
+
+        private void lbOtherUsers_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            var person = lbOtherUsers.SelectedItem as string;
+            if (person == null) return;
+            StartConversation(person);
+        }
+
+        private ConversationForm StartConversation(string person)
+        {
+            ConversationForm chatForm = null;
+            Invoke(() =>
+            {
+                chatForm = _forms.GetOrAdd(person, _ =>
+                {
+                    var form = new ConversationForm(tbUserID.Text, person);
+                    _forms[person] = form;
+                    var msgSent = new Action<string>(msg =>
+                    {
+                        _chatApiClient.Hub.Call(c => c.SendMessage(new SendMessageParam()
+                        {
+                            DestinationUserID = person,
+                            Message = msg
+                        }));
+                    });
+                    form.MessageSent += msgSent;
+                    form.Closed += (sender, args) =>
+                    {
+                        form.MessageSent -= msgSent;
+                        ConversationForm tmp;
+                        _forms.TryRemove(person, out tmp);
+                    };
+                    form.Show();
+                    return form;
+                });
+                chatForm.BringToFront();
+            });
+            return chatForm;
+        }
+
+        private void Invoke(Action action)
+        {
+            if (this.InvokeRequired) this.Invoke(new MethodInvoker(action));
+            else action();
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace SignalRClient
+﻿namespace Client
 {
     partial class ChangePasswordDialog
     {

@@ -15,7 +15,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RegistrarChatApi", "Registr
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{BF55F6F5-3DAC-415C-943B-7BFEABF94A34}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SignalRClient", "SignalRClient\SignalRClient.csproj", "{343CF585-9724-4C7E-995E-2F023C20391B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Client", "SignalRClient\Client.csproj", "{343CF585-9724-4C7E-995E-2F023C20391B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RegistrarCommon", "RegistrarCommon\RegistrarCommon.csproj", "{3D9DCDD7-1145-420D-9931-33070A3715D3}"
 EndProject
