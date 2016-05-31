@@ -4,10 +4,13 @@ using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Julas.Utils;
 using Julas.Utils.Reactive;
+using NAudio.MediaFoundation;
 using NAudio.Wave;
 
 namespace Audio
@@ -16,56 +19,80 @@ namespace Audio
     {
         public IEnumerable<DeviceInfo> GetDevices()
         {
-            foreach (var id in Enumerable.Range(0, WaveIn.DeviceCount))
-            {
-                var info = WaveIn.GetCapabilities(id);
-                yield return new DeviceInfo()
+            return WaveIn.DeviceCount
+                .Map(x => Enumerable.Range(0, x))
+                .Select(WaveIn.GetCapabilities)
+                .Select((x, i) => new DeviceInfo()
                 {
-                    Name = info.ProductName,
-                    ID = id
-                };
-            }
+                    ID = i,
+                    Name = x.ProductName
+                });
         }
 
         public IAudioStream GetAudioPacketStream(int deviceID)
         {
-            var waveIn = new WaveInEvent();
+            var waveIn = new WaveIn();
             waveIn.BufferMilliseconds = 100;
-            waveIn.DeviceNumber = deviceID;
-            waveIn.NumberOfBuffers = 2;
-            var stream = waveIn.GetStream();
-
-            return new AudioPacketStream(stream, 160, TimeSpan.FromSeconds(1));
+            waveIn.WaveFormat = Utils.GetRawFormat();
+            return new AudioPacketStream(waveIn);
         }
 
         private class AudioPacketStream : IAudioStream
         {
-            private readonly Stream _audioStream;
-            private readonly IObjectReader<IList<byte>> _reader;
-            public IObservable<IList<byte>> PacketSource { get; }
+            private readonly Stream _rawAudioStream;
+            private readonly WaveIn _waveIn;
+            private readonly Subject<IList<byte>> _subject;
+            private CancellationTokenSource _source;
 
-            public AudioPacketStream(Stream stream, int bytesPerPacket, TimeSpan delay = default(TimeSpan))
+            public IObservable<IList<byte>> PacketSource => _subject;
+            
+
+            public AudioPacketStream(WaveIn waveIn)
             {
-                _audioStream = stream;
-                _reader = ObjectReader.Create<IList<byte>>(stream, new Func<Stream, Task<Option<IList<byte>>>>(
-                    async str =>
-                    {
-                        var buffer = new byte[bytesPerPacket];
-                        var bytesRead = await str.ReadAsync(buffer, 0, buffer.Length);
-                        return Option.Some<IList<byte>>(bytesRead == buffer.Length ? buffer : buffer.Take(bytesRead).ToArray());
-                    }));
-                PacketSource = _reader.ToObservable();
-                if (delay > TimeSpan.Zero)
+                _subject = new Subject<IList<byte>>();
+                _source = new CancellationTokenSource();
+                var provider = new WaveInProvider(waveIn);
+                Task.Factory.StartNew(() =>
                 {
-                    PacketSource = PacketSource.Delay(delay);
+                    byte[] buf = 
+                });
+            }
+
+            private void WaveInOnDataAvailable(object sender, WaveInEventArgs e)
+            {
+                _rawAudioStream.Write(e.Buffer, 0, e.BytesRecorded);
+            }
+
+            private async Task TaskLoop(CancellationToken token)
+            {
+                while (!token.IsCancellationRequested)
+                {
+                    if (_device.AvailableSamples < 160 || !_device.IsRunning)
+                    {
+                        await Task.Delay(10);
+                    }
+                    else
+                    {
+                        var buffer = new byte[320];
+                        _device.ReadSamples(buffer,160);
+                        var encoded = new byte[160];
+                        for (int i = 0; i < 160; i++)
+                        {
+                            var sample = BitConverter.ToInt16(buffer, i*2);
+                            encoded[i] = Pcma.Encode(sample);
+                        }
+                        _packetSubject.OnNext(encoded);
+                    }
                 }
             }
-            
+
             public void Dispose()
             {
-                _reader.Dispose();
-                _audioStream.Dispose();
+                _device.Stop();
+                _source.Cancel();
             }
+
+            
         }
     }
 }

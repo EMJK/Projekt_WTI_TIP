@@ -19,19 +19,19 @@ namespace Client
         private readonly string _otherUserId;
         private readonly HtmlPanel _htmlPanel;
 
-        private readonly Color TextColor = Color.Black;
-        private readonly Color TimestampColor = Color.DarkGray;
-        private readonly Color ThisUserColor = Color.DodgerBlue;
-        private readonly Color OtherUserColor = Color.DarkOrange;
-        private readonly int FontSize = 1;
+        private readonly Color _textColor = Color.Black;
+        private readonly Color _timestampColor = Color.DarkGray;
+        private readonly Color _thisUserColor = Color.DodgerBlue;
+        private readonly Color _otherUserColor = Color.DarkOrange;
+        private readonly int _fontSize = 1;
 
         public event Action<string> MessageSent;
         public event Action Call;
         public event Action HangUp;
 
-        public ConversationForm(string thisUserID, string otherUserId)
+        public ConversationForm(string thisUserId, string otherUserId)
         {
-            _thisUserId = thisUserID;
+            _thisUserId = thisUserId;
             _otherUserId = otherUserId;
             InitializeComponent();
             this.Text = $"Conversation with {otherUserId}";
@@ -42,22 +42,22 @@ namespace Client
 
         public void AppendMessageFromOtherUser(string message)
         {
-            AppendMessage(message, _otherUserId, OtherUserColor);
+            AppendMessage(message, _otherUserId, _otherUserColor);
         }
 
         private void AppendMessageFromThisUser(string message)
         {
-            AppendMessage(message, _thisUserId, ThisUserColor);
+            AppendMessage(message, _thisUserId, _thisUserColor);
         }
 
         private void AppendMessage(string msg, string from, Color nameColor)
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("<p>");
-            sb.Append($"<b><font color=\"{GetHexColor(nameColor)}\" size=\"{FontSize}\">{from}</font></b> ");
-            sb.Append($"<font color=\"{GetHexColor(TimestampColor)}\" size=\"{FontSize}\">{DateTime.Now.ToString("HH:mm:ss")}</font>");
+            sb.Append($"<b><font color=\"{GetHexColor(nameColor)}\" size=\"{_fontSize}\">{from}</font></b> ");
+            sb.Append($"<font color=\"{GetHexColor(_timestampColor)}\" size=\"{_fontSize}\">{DateTime.Now.ToString("HH:mm:ss")}</font>");
             sb.Append("<br/>");
-            sb.Append($"<font color=\"{GetHexColor(TextColor)}\" size=\"{FontSize}\">{msg}</font>");
+            sb.Append($"<font color=\"{GetHexColor(_textColor)}\" size=\"{_fontSize}\">{msg}</font>");
             sb.Append("</p>");
             _htmlPanel.Text += sb.ToString();
             _htmlPanel.VerticalScroll.Value = _htmlPanel.VerticalScroll.Maximum;

@@ -10,21 +10,9 @@ namespace Audio
 {
     public class AudioPlayer
     {
-        public IEnumerable<DeviceInfo> GetDevices()
-        {
-            foreach (var id in Enumerable.Range(0, WaveOut.DeviceCount))
-            {
-                var info = WaveOut.GetCapabilities(id);
-                yield return new DeviceInfo()
-                {
-                    Name = info.ProductName,
-                    ID = id
-                };
-            }
-        }
-
         public IDisposable PlayAudioPacketStream(int deviceID, IAudioStream stream)
         {
+            va
             var waveOut = new WaveOutEvent();
             waveOut.DesiredLatency = 50;
             waveOut.DeviceNumber = deviceID;
