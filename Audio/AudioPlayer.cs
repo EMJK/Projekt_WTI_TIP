@@ -4,78 +4,52 @@ using System.IO;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Threading;
+using Julas.Utils;
+using NAudio.Codecs;
 using NAudio.Wave;
 
 namespace Audio
 {
     public class AudioPlayer
     {
-        public IDisposable PlayAudioPacketStream(int deviceID, IAudioStream stream)
+        public IEnumerable<DeviceInfo> GetDevices()
         {
-            va
-            var waveOut = new WaveOutEvent();
-            waveOut.DesiredLatency = 50;
-            waveOut.DeviceNumber = deviceID;
-            waveOut.NumberOfBuffers = 2;
-            var waveProvider = new ObservableWaveProvider(stream);
-            var cleanup = Disposable.Create(() =>
+            return WaveOut.DeviceCount
+                .Map(x => Enumerable.Range(0, x))
+                .Select(WaveOut.GetCapabilities)
+                .Select((x, i) => new DeviceInfo()
+                {
+                    ID = i,
+                    Name = x.ProductName
+                });
+        }
+
+        public IDisposable PlayAudioPacketStream(int deviceID, IObservable<byte[]> packetSource)
+        {
+            var waveOut = new WaveOutEvent()
             {
-                waveOut.Stop();
-                waveOut.Dispose();
+                DeviceNumber = deviceID,
+                DesiredLatency = 100
+            };
+
+            var provider = new BufferedWaveProvider(new WaveFormat(8000, 16, 1));
+            var subscription = packetSource.Subscribe(data =>
+            {
+                for (int i = 0; i < data.Length; i++)
+                {
+                    var pcmSample = BitConverter.GetBytes(ALawDecoder.ALawToLinearSample(data[i]));
+                    provider.AddSamples(pcmSample, 0, pcmSample.Length);
+                }
             });
-            waveOut.Init(waveProvider);
-            
+            waveOut.Init(provider);
+            waveOut.Play();
             return Disposable.Create(() =>
             {
+                waveOut.Stop();
+                subscription.Dispose();
                 waveOut.Dispose();
-                cleanup.Dispose();
             });
-        }
-
-        private Stream ObservableToStream<T>(IObservable<T> observable) where T : IList<byte>
-        {
-            var stream = new MemoryStreamFromObservable();
-            var subscription = observable.Subscribe(
-                packet => stream.Write(packet.ToArray(), 0, packet.Count));
-            stream.BeforeDispose = subscription.Dispose;
-            return stream;
-        }
-
-        private class MemoryStreamFromObservable : MemoryStream
-        {
-            public Action BeforeDispose { get; set; }
-
-            protected override void Dispose(bool disposing)
-            {
-                BeforeDispose?.Invoke();
-                base.Dispose(disposing);
-            }
-        }
-
-        private class ObservableWaveProvider : IWaveProvider
-        {
-            private readonly IAudioStream _stream;
-            private IEnumerable<byte> _byteSource;
-            private IEnumerator<byte> _enumerator;
-            public WaveFormat WaveFormat { get; }
-
-            public ObservableWaveProvider(IAudioStream stream)
-            {
-                _stream = stream;
-                WaveFormat = WaveFormat.CreateALawFormat(8000, 1);
-                _byteSource = stream.PacketSource.ToEnumerable().SelectMany(x => x);
-                _enumerator = _byteSource.GetEnumerator();
-            }
-
-            public int Read(byte[] buffer, int offset, int count)
-            {
-                int i = 0;
-                while(i < count && _enumerator.MoveNext())
-                {
-                    buffer[i + offset] = _enumerator.Current;
-                }
-                return i;
-            }
         }
     }
 }

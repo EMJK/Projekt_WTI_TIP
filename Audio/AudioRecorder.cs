@@ -4,14 +4,18 @@ using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Julas.Utils;
 using Julas.Utils.Reactive;
+using NAudio.Codecs;
 using NAudio.MediaFoundation;
+using NAudio.Utils;
 using NAudio.Wave;
+using NAudio.Wave.Compression;
 
 namespace Audio
 {
@@ -29,70 +33,59 @@ namespace Audio
                 });
         }
 
-        public IAudioStream GetAudioPacketStream(int deviceID)
+        public IAudioStream GetAudioPacketStream(int deviceID, int samplesPerPacket)
         {
-            var waveIn = new WaveIn();
-            waveIn.BufferMilliseconds = 100;
-            waveIn.WaveFormat = Utils.GetRawFormat();
-            return new AudioPacketStream(waveIn);
+            var waveIn = new WaveInEvent
+            {
+                DeviceNumber = deviceID,
+                BufferMilliseconds = 100,
+                WaveFormat = new WaveFormat(8000, 16, 1)
+            };
+            return new AudioPacketStream(waveIn, samplesPerPacket);
         }
 
         private class AudioPacketStream : IAudioStream
         {
-            private readonly Stream _rawAudioStream;
-            private readonly WaveIn _waveIn;
-            private readonly Subject<IList<byte>> _subject;
-            private CancellationTokenSource _source;
+            private readonly WaveInEvent _waveIn;
+            private readonly int _samplesPerPacket;
+            private readonly Subject<byte[]> _subject;
+            private readonly List<byte> _buffer; 
 
-            public IObservable<IList<byte>> PacketSource => _subject;
-            
+            public IObservable<byte[]> PacketSource => _subject;
 
-            public AudioPacketStream(WaveIn waveIn)
+            public AudioPacketStream(WaveInEvent waveIn, int samplesPerPacket)
             {
-                _subject = new Subject<IList<byte>>();
-                _source = new CancellationTokenSource();
-                var provider = new WaveInProvider(waveIn);
-                Task.Factory.StartNew(() =>
-                {
-                    byte[] buf = 
-                });
+                _buffer = new List<byte>(samplesPerPacket);
+                _subject = new Subject<byte[]>();
+                _waveIn = waveIn;
+                _samplesPerPacket = samplesPerPacket;
+                _waveIn.DataAvailable += WaveInOnDataAvailable;
+                _waveIn.StartRecording();
             }
 
             private void WaveInOnDataAvailable(object sender, WaveInEventArgs e)
             {
-                _rawAudioStream.Write(e.Buffer, 0, e.BytesRecorded);
-            }
-
-            private async Task TaskLoop(CancellationToken token)
-            {
-                while (!token.IsCancellationRequested)
+                for (int i = 0; i < e.BytesRecorded; i+= 2)
                 {
-                    if (_device.AvailableSamples < 160 || !_device.IsRunning)
+                    var pcm16Sample = BitConverter.ToInt16(e.Buffer, i);
+                    var alawSample = ALawEncoder.LinearToALawSample(pcm16Sample);
+                    _buffer.Add(alawSample);
+                    if (_buffer.Count == _samplesPerPacket)
                     {
-                        await Task.Delay(10);
-                    }
-                    else
-                    {
-                        var buffer = new byte[320];
-                        _device.ReadSamples(buffer,160);
-                        var encoded = new byte[160];
-                        for (int i = 0; i < 160; i++)
-                        {
-                            var sample = BitConverter.ToInt16(buffer, i*2);
-                            encoded[i] = Pcma.Encode(sample);
-                        }
-                        _packetSubject.OnNext(encoded);
+                        var toSend = _buffer.ToArray();
+                        _buffer.Clear();
+                        _subject.OnNext(toSend);
                     }
                 }
             }
 
             public void Dispose()
             {
-                _device.Stop();
-                _source.Cancel();
+                _waveIn.StopRecording();
+                _waveIn.DataAvailable -= WaveInOnDataAvailable;
+                _waveIn.Dispose();
+                _subject.OnCompleted();
             }
-
-            
         }
     }
 }
