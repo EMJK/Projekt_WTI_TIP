@@ -8,6 +8,6 @@ namespace Audio
 {
     public interface IAudioStream : IDisposable
     {
-        IObservable<IList<byte>> PacketSource { get; }
+        IObservable<byte[]> PacketSource { get; }
     }
 }
