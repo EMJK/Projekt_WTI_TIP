@@ -57,6 +57,9 @@
       <HintPath>..\packages\Newtonsoft.Json.8.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="OzekiSDK">
+      <HintPath>..\packages\OzekiSDK.dll</HintPath>
+    </Reference>
     <Reference Include="SignalR.Client.TypedHubProxy, Version=3.0.0.0, Culture=neutral, PublicKeyToken=c6c1166b0a310e11, processorArchitecture=MSIL">
       <HintPath>..\packages\SignalR.Client.TypedHubProxy.3.0.1\lib\net45\SignalR.Client.TypedHubProxy.dll</HintPath>
       <Private>True</Private>
@@ -128,6 +131,7 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SIPphone.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

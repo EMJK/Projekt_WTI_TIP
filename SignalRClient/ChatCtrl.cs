@@ -12,13 +12,14 @@ using RegistrarChatApiClient;
 using RegistrarWebApiClient;
 using RegistrarWebApiClient.Models.Account;
 
+
 namespace Client
 {
     public partial class ChatCtrl : UserControl
     {
         private WebApiClient _webApiClient;
         private ChatApiClient _chatApiClient;
-        private ConcurrentDictionary<string, ConversationForm> _forms; 
+        private ConcurrentDictionary<string, ConversationForm> _forms;
 
         public ChatCtrl()
         {
@@ -48,7 +49,7 @@ namespace Client
                 {
                     Invoke(() => FillUserList(msg.Clients));
                 });
-
+                
                 SetControlsToLoginState(true);
             }
             catch (WebApiException ex)
@@ -178,7 +179,7 @@ namespace Client
             {
                 chatForm = _forms.GetOrAdd(person, _ =>
                 {
-                    var form = new ConversationForm(tbUserID.Text, person);
+                    var form = new ConversationForm(tbUserID.Text, person, tbPassword.Text);
                     _forms[person] = form;
                     var msgSent = new Action<string>(msg =>
                     {
@@ -207,6 +208,11 @@ namespace Client
         {
             if (this.InvokeRequired) this.Invoke(new MethodInvoker(action));
             else action();
+        }
+
+        private void tbUserID_TextChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }

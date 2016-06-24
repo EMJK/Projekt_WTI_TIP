@@ -17,16 +17,14 @@ ALTER TABLE public.users ADD CONSTRAINT users_username_uq UNIQUE (username);
 
 CREATE TABLE billing (
     id serial,
-    calling_user_id int not null,
-    called_user_id int not null,
+    calling_user_id text not null,
+    called_user_id text not null,
     source_IP text not null,
-    destination_IP text not null,
     start_billing timestamp with time zone not null,
-    stop_billing timestamp with time zone
+    stop_billing timestamp with time zone,
+    call_id text not null
 );
 ALTER TABLE billing ADD PRIMARY KEY (id);
-ALTER TABLE billing ADD CONSTRAINT calling_user_id_fk FOREIGN KEY (id) REFERENCES users ON DELETE CASCADE;
-ALTER TABLE billing ADD CONSTRAINT called_user_id_fk FOREIGN KEY (id) REFERENCES users ON DELETE CASCADE;
 
 
 CREATE TABLE registrar_table (

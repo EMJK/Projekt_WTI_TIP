@@ -53,7 +53,8 @@
             // btnCall
             // 
             this.btnCall.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.btnCall.Location = new System.Drawing.Point(157, 19);
+            this.btnCall.Enabled = false;
+            this.btnCall.Location = new System.Drawing.Point(154, 19);
             this.btnCall.Name = "btnCall";
             this.btnCall.Size = new System.Drawing.Size(243, 75);
             this.btnCall.TabIndex = 0;

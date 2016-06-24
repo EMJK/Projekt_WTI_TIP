@@ -1,27 +1,4 @@
-﻿//using System;
-//using System.Collections.Generic;
-//using System.Linq;
-//using System.Text;
-//using System.Threading.Tasks;
-//using Ninject;
-
-//namespace RegistrarSipApi
-//{
-//    public class RegistrarSipServer : IDisposable
-//    {
-//        public RegistrarSipServer(string host, int port, IKernel kernel)
-//        {
-//            Console.WriteLine($"SIP server started at {host}:{port}");
-//        }
-
-//        public void Dispose()
-//        {
-//            Console.WriteLine("SIP server stopped");
-//        }
-//    }
-//}
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
@@ -30,32 +7,14 @@ using System.Net;
 using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Data;
+
 using Npgsql;
 using System.Linq;
+using Ozeki.Network;
+using Ozeki.VoIP;
 
 namespace RegistrarSipApi
 {
-    enum Headers
-    {
-        Method,
-        To,
-        From,
-        MaxForwards,
-        Via,
-        Contact,
-        CallId,
-        CSeq,
-        Expires,
-        Allow,
-        UserAgent,
-        ContentLength,
-        Authorization,
-        RecordRoute,
-        Route,
-        Server,
-        WWWAuthenticate
-    }
-
     public class DBpart
     {
         public NpgsqlConnection connection;
@@ -79,11 +38,16 @@ namespace RegistrarSipApi
             NpgsqlParameter par = new NpgsqlParameter(paramName, paramValue);
             sqlc.Parameters.Add(par);
 
-            sqlc.Connection = this.connection; // connection to DB
-            dr = sqlc.ExecuteReader(); // query execution and creation of dr pointer
-            dt.Load(dr); //load data to dataTable object
-            connection.Close();
-            return dt; // return data
+            try
+            {
+                sqlc.Connection = this.connection; // connection to DB
+                dr = sqlc.ExecuteReader(); // query execution and creation of dr pointer
+                dt.Load(dr); //load data to dataTable object
+                connection.Close();
+                return dt; // return data
+            }
+            catch
+            { return null; }
         }
 
         public int WriteDataToDB(string command, string paramName, object paramValue)
@@ -119,313 +83,129 @@ namespace RegistrarSipApi
 
     }
 
-    public class RegistrarSipServer
+    public class SipServer : PBXBase
     {
-        private readonly int _basePort;
-        UdpClient _socket;
-        bool _stopTask = false;
-        string _realm;
-        readonly string _server = "SipServer EM&JK v0.9";
+        Dictionary<string, NpgsqlTypes.NpgsqlDateTime> CallStart = new Dictionary<string, NpgsqlTypes.NpgsqlDateTime>();
 
-        public RegistrarSipServer(int basePort, string realm)
-        {
-            _basePort = basePort;
-            _realm = realm;
-        }
-        public void Start()
-        {
-            _stopTask = false;
-            IPEndPoint ipep = new IPEndPoint(IPAddress.Any, _basePort);
-            _socket = new UdpClient(ipep);
+        string _localAddress;
+        DBpart DBobject;
 
-            IPEndPoint sender = new IPEndPoint(IPAddress.Any, 0);
-            Console.WriteLine($"SIP server started (SIP port {_basePort})");
-            Task.Factory.StartNew(() => Listen(sender));
+        public SipServer(string localAddress, int minPortRange, int maxPortRange)
+            : base(minPortRange, maxPortRange)
+        {
+            _localAddress = localAddress;
+            Console.WriteLine("SipServer starting...");
+            Console.WriteLine("Local address: " + localAddress);
+
+            DBobject = new DBpart();
         }
 
-        private void Listen(IPEndPoint sender)
+        protected override void OnStart()
         {
-            // Receive Packet
-            while (!_stopTask)
+            Console.WriteLine("SipServer started.");
+            SetListenPort(_localAddress, 5060, Ozeki.Network.TransportType.Udp);
+
+            Console.WriteLine("Listened port: 5060(UDP)");
+
+            base.OnStart();
+        }
+
+        protected override AuthenticationResult OnAuthenticationRequest(ISIPExtension extension, RequestAuthenticationInfo authInfo)
+        {
+            Console.WriteLine("Authentication request received from: " + extension.ExtensionID);
+
+            AuthenticationResult result = new AuthenticationResult();
+
+            string user = extension.ExtensionID;
+            //Get user's password from db
+            string command = "select password_hash from users where username = @user and status = 'A';";
+            DataTable table = DBobject.GetDataFromDB(command, "@user", user);
+            if (table.Rows != null && table.Rows.Count > 0 && table.Rows[0].ItemArray.Any())
             {
-                try
-                {
-                    byte[] data = _socket.Receive(ref sender);
-                    string str = Encoding.ASCII.GetString(data);
-                    string[] packet = str.Split(new[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
-                    if (packet.Length == 0) continue;
-                    string[] parsed = ParsePacket(packet);
-                    string method = parsed[(int)Headers.Method].Split(' ')[0];
-                    switch (method)
-                    {
-                        case "REGISTER":
-                            Console.WriteLine("REGISTER");
-                            RegisterHandler(parsed, sender);
-                            break;
-                        default:
-                            Console.WriteLine("dupa");
-                            break;
-
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("Failed to parse the packet! :-(");
-                }
-
+                string pass = table.Rows[0].ItemArray[0].ToString();
+                //UserInfo userInfo;
+                result = extension.CheckPassword(user, pass, authInfo);
             }
-        }
-
-        private string[] ParsePacket(string[] packet)
-        {
-            string[] parsed = new string[20];
-            int index = 99;
-            for (int i = 0; i < packet.Length; i++)
+            else
             {
-                if (packet[i].Length < 10)
-                    continue;
-                if (i == 0)
-                {
-                    parsed[(int)Headers.Method] = packet[i];
-                    continue;
-                }
-
-                index = packet[i].IndexOf("To: ", 0, 4);
-                if (index == 0)
-                {
-                    parsed[(int)Headers.To] = packet[i].Substring(4, packet[i].Length - 4);
-                    index = 99;
-                    continue;
-                }
-                index = 99;
-
-                index = packet[i].IndexOf("From: ", 0, 6);
-                if (index == 0)
-                {
-                    parsed[(int)Headers.From] = packet[i].Substring(6, packet[i].Length - 6);
-                    index = 99;
-                    continue;
-                }
-                index = 99;
-
-                index = packet[i].IndexOf("Authorizat", 0, 10);
-                if (index == 0)
-                {
-                    parsed[(int)Headers.Authorization] = packet[i].Substring(15, packet[i].Length - 15);
-                    index = 99;
-                    continue;
-                }
-                index = 99;
-
-                index = packet[i].IndexOf("Max-Forwar", 0, 10);
-                if (index == 0)
-                {
-                    parsed[(int)Headers.MaxForwards] = packet[i].Substring(14, packet[i].Length - 14);
-                    index = 99;
-                    continue;
-                }
-                index = 99;
-
-                index = packet[i].IndexOf("Via: ", 0, 5);
-                if (index == 0)
-                {
-                    parsed[(int)Headers.Via] = packet[i].Substring(5, packet[i].Length - 5);
-                    index = 99;
-                    continue;
-                }
-                index = 99;
-
-                index = packet[i].IndexOf("Contact: ", 0, 9);
-                if (index == 0)
-                {
-                    parsed[(int)Headers.Contact] = packet[i].Substring(9, packet[i].Length - 9);
-                    index = 99;
-                    continue;
-                }
-                index = 99;
-
-                index = packet[i].IndexOf("Call-ID: ", 0, 9);
-                if (index == 0)
-                {
-                    parsed[(int)Headers.CallId] = packet[i].Substring(9, packet[i].Length - 9);
-                    index = 99;
-                    continue;
-                }
-                index = 99;
-
-                index = packet[i].IndexOf("CSeq: ", 0, 6);
-                if (index == 0)
-                {
-                    parsed[(int)Headers.CSeq] = packet[i].Substring(6, packet[i].Length - 6);
-                    index = 99;
-                    continue;
-                }
-                index = 99;
-
-                index = packet[i].IndexOf("Expires: ", 0, 9);
-                if (index == 0)
-                {
-                    parsed[(int)Headers.Expires] = packet[i].Substring(9, packet[i].Length - 9);
-                    index = 99;
-                    continue;
-                }
-
-                index = 99;
-
-                index = packet[i].IndexOf("Allow: ", 0, 7);
-                if (index == 0)
-                {
-                    parsed[(int)Headers.Allow] = packet[i].Substring(7, packet[i].Length - 7);
-                    index = 99;
-                    continue;
-                }
-                index = 99;
-
-                index = packet[i].IndexOf("User-Agent", 0, 10);
-                if (index == 0)
-                {
-                    parsed[(int)Headers.UserAgent] = packet[i].Substring(12, packet[i].Length - 12);
-                    index = 99;
-                    continue;
-                }
-                index = 99;
-
-                index = packet[i].IndexOf("Content-Le", 0, 10);
-                if (index == 0)
-                {
-                    parsed[(int)Headers.ContentLength] = packet[i].Substring(16, packet[i].Length - 16);
-                    index = 99;
-                    continue;
-                }
-                index = 99;
-
-                index = packet[i].IndexOf("Record-Rou", 0, 10);
-                if (index == 0)
-                {
-                    parsed[(int)Headers.RecordRoute] = packet[i].Substring(14, packet[i].Length - 14);
-                    index = 99;
-                    continue;
-                }
-                index = 99;
-
-                index = packet[i].IndexOf("Route: ", 0, 7);
-                if (index == 0)
-                {
-                    parsed[(int)Headers.Route] = packet[i].Substring(7, packet[i].Length - 7);
-                    index = 99;
-                    continue;
-                }
-                index = 99;
-
-            }
-            return parsed;
-        }
-
-        private string CalculateMD5Hash(string input)
-
-        {
-            MD5 md5 = MD5.Create();
-            byte[] inputBytes = Encoding.ASCII.GetBytes(input);
-            byte[] hash = md5.ComputeHash(inputBytes);
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < hash.Length; i++)
-            {
-                sb.Append(hash[i].ToString("x2"));
-            }
-            return sb.ToString();
-        }
-
-        private void RegisterHandler(string[] packet, IPEndPoint sender)
-        {
-            if (packet[(int)Headers.Authorization] != null)
-            {
-                string[] auth = packet[(int)Headers.Authorization].Split(',');
-                string username = auth[0].Split('=')[1];
-                username = username.Substring(1, username.Length - 2);
-                string nonce = auth[2].Split('=')[1];
-                nonce = nonce.Substring(1, nonce.Length - 2);
-                string uri = auth[3].Split('=')[1];
-                uri = uri.Substring(1, uri.Length - 2);
-                string response = auth[4].Split('=')[1];
-                response = response.Substring(1, response.Length - 3);
-
-                //Get user's password from db
-                string command = "select password from \"Users\" where username = @user and status = 'A';";
-                DBpart oobject = new DBpart();
-                DataTable table = oobject.GetDataFromDB(command, "@user", username);
-                if (table.Rows.Count > 0 && table.Rows[0].ItemArray.Any())
-                {
-                    string pass = table.Rows[0].ItemArray[0].ToString();
-                    //Check auth
-                    string a1 = CalculateMD5Hash(username + ":" + _realm + ":" + pass);
-                    string a2 = CalculateMD5Hash(packet[(int)Headers.Method].Split(' ')[0] + ":" + uri);
-                    string result = CalculateMD5Hash(a1 + ":" + nonce + ":" + a2);
-                    if (result == response)
-                    {
-                        Console.WriteLine("Register Accepted");
-
-
-                        //Save location to DB and reply with 200ok ////// I O TUTAJ
-                        Dictionary<string, object> parameters = new Dictionary<string, object>();
-                        string received = sender.Address.ToString() + ":" + sender.Port.ToString();
-                        double seconds = Double.Parse(packet[(int)Headers.Expires]);
-                        DateTime expires = DateTime.Now.AddSeconds(seconds);
-                        parameters.Add("@username", username);
-                        parameters.Add("@domain", _realm);
-                        parameters.Add("@contact", packet[(int)Headers.Contact]);
-                        parameters.Add("@received", received);
-                        parameters.Add("@expires", expires);
-                        parameters.Add("@user_agent", packet[(int)Headers.UserAgent]);
-
-                        command = "insert into \"Registrar_table\" (username, domain, contact, received, expires, user_agent)"
-                                  + " select @username, @domain, @contact, @received, @expires, @user_agent where not exists (select from \"Registrar_table\" where username = @username);";
-                        oobject.WriteDataToDB(command, parameters);
-                        return;
-                    }
-                }
+                Console.WriteLine("Cannot find extension. UserName: " + extension.ExtensionID);
             }
 
+            if (result != null && result.AuthenticationAccepted)
+            {
+                Console.WriteLine("Authentication accepted. UserName: " + extension.ExtensionID);
+            }
+            else
+            {
+                Console.WriteLine("Authentication denied. UserName: " + extension.ExtensionID);
+            }
 
-            string[] reply = new string[20];
-            //Method
-            reply[(int)Headers.Method] = "SIP/2.0 401 Unathorized\r\n";
-            //Via
-            reply[(int)Headers.Via] = "Via: " + packet[(int)Headers.Via] + '\n';
-            //To
-            var random = new Random();
-            var tag = String.Format("{0:X6}", random.Next(0xFFFFFFF));
-            reply[(int)Headers.To] = "To: " + packet[(int)Headers.To].Remove(packet[(int)Headers.To].Length - 1) + ";tag=" + tag.ToLower() + "\r\n";
-            //From
-            reply[(int)Headers.From] = "From: " + packet[(int)Headers.From] + '\n';
-            //CallId
-            reply[(int)Headers.CallId] = "Call-ID: " + packet[(int)Headers.CallId] + '\n';
-            //CSeq
-            reply[(int)Headers.CSeq] = "CSeq: " + packet[(int)Headers.CSeq] + '\n';
-            //WWW-Auth
-            random = new Random();
-            string newnonce = random.Next().ToString();
-            newnonce = CalculateMD5Hash(newnonce);
-            reply[(int)Headers.WWWAuthenticate] = "WWW-Authenticate: Digest realm=\"" + _realm + "\", nonce=\"" + newnonce + "\"\r\n";
-            //Server
-            reply[(int)Headers.Server] = "Server: " + _server + "\r\n";
-            //Content length
-            reply[(int)Headers.ContentLength] = "Content-Length: 0\r\n";
-
-            string connectedreply = "";
-            for (int i = 0; i < reply.Length; i++)
-                connectedreply += reply[i];
-            connectedreply += "\r\n";
-            byte[] bytereply = Encoding.ASCII.GetBytes(connectedreply);
-            _socket.Send(bytereply, bytereply.Length, sender);
+            return result;
         }
 
-        public void Stop()
+        protected override RegisterResult OnRegisterReceived(ISIPExtension extension, SIPAddress from, int expires)
         {
-            _socket.Close();
-            _stopTask = true;
-            Console.WriteLine($"SIP server stopped");
+
+            Console.WriteLine("Register received from: " + extension.ExtensionID);
+            //Save location to DB
+            Dictionary<string, object> parameters = new Dictionary<string, object>();
+            string received = "sip:" + extension.InstanceInfo.Transport.RemoteEndPoint.Address.ToString() + ":" + extension.InstanceInfo.Transport.RemoteEndPoint.Port.ToString();
+            double seconds = expires;
+            DateTime expiredate = DateTime.Now.AddSeconds(seconds);
+            parameters.Add("@username", extension.AuthName);
+            parameters.Add("@domain", from.Address);
+            parameters.Add("@contact", extension.InstanceInfo.Contact.ToString());
+            parameters.Add("@received", received);
+            parameters.Add("@expires", expiredate);
+
+            string command = "UPDATE registrar_table  SET domain = @domain, contact = @contact, received = @received, expires = @expires WHERE username = @username;"
+                      + "insert into registrar_table (username, domain, contact, received, expires)"
+                      + " select @username, @domain, @contact, @received, @expires where not exists (select from registrar_table where username = @username);";
+            DBobject.WriteDataToDB(command, parameters);
+            return base.OnRegisterReceived(extension, from, expires);
+        }
+
+        protected override void OnUnregisterReceived(ISIPExtension extension)
+        {
+            Console.WriteLine("Unregister received from: " + extension.ExtensionID);
+            base.OnUnregisterReceived(extension);
+        }
+
+        protected override void OnCallRequestReceived(ISessionCall call)
+        {
+            Console.WriteLine("Call request received. Caller: " + call.DialInfo.CallerID + " callee: " + call.DialInfo.Dialed);
+            call.CallStateChanged += Call_CallStateChanged;
+            base.OnCallRequestReceived(call);
+        }
+
+        private void Call_CallStateChanged(object sender, CallStateChangedArgs e)
+        {
+            SIPCall call1 = (SIPCall)sender;
+            if (e.State == CallState.Answered)
+            {
+                CallStart.Add(call1.CallID, NpgsqlTypes.NpgsqlDateTime.Now);
+            }
+
+            if (e.State == CallState.Completed)
+            {
+                NpgsqlTypes.NpgsqlDateTime startValue;
+                if (CallStart.TryGetValue(call1.CallID, out startValue))
+                {
+                    Dictionary<string, object> parameters = new Dictionary<string, object>();
+                    parameters.Add("@calling_user_id", call1.CallerIDAsCaller);
+                    parameters.Add("@called_user_id", call1.DialInfo.Dialed);
+                    parameters.Add("@source_ip", call1.BasicInfo.Owner.InstanceInfo.Transport.RemoteEndPoint.ToString());
+                    parameters.Add("@start_billing", startValue);
+                    parameters.Add("@stop_billing", NpgsqlTypes.NpgsqlDateTime.Now);
+                    parameters.Add("@call_id", call1.CallID);
+                    string command = "insert into billing (calling_user_id, called_user_id, source_ip, start_billing, stop_billing, call_id)"
+                                 + "values(@calling_user_id, @called_user_id, @source_ip, @start_billing, @stop_billing, @call_id)";
+
+                    DBobject.WriteDataToDB(command, parameters);
+
+                    CallStart.Remove(call1.CallID);
+                }
+            }            
         }
     }
 }
-
-

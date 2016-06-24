@@ -10,6 +10,7 @@ using RegistrarChatApi;
 using RegistrarCommon;
 using RegistrarSipApi;
 using RegistrarWebApi;
+using Ozeki.Network;
 
 namespace Registrar
 {
@@ -27,13 +28,14 @@ namespace Registrar
             var webApiUri = $"http://{host}:{webApiPort}/";
             var chatApiUri = $"http://{host}:{chatApiPort}/";
 
-            var sipserver = new RegistrarSipServer(5060, "10.0.0.4");
+            var sipserver = new SipServer(NetworkAddressHelper.GetLocalIP().ToString(), 20000, 20500);
+            sipserver.Start();
 
             var kernel = GetNinjectKernel();
 
             sipserver.Start();
-            using (new RegistrarHttpServer(webApiUri, kernel))
-            using (new RegistrarSignalRServer(chatApiUri, kernel))
+            //using (new RegistrarHttpServer(webApiUri, kernel))
+            //using (new RegistrarSignalRServer(chatApiUri, kernel))
             //using (new RegistrarSipServer(host, sipPort, kernel))
             {
                 Console.ReadLine();

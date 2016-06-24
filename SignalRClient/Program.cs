@@ -21,15 +21,15 @@ namespace Client
     {
         static void Main(string[] args)
         {
-            var recorder = new AudioRecorder();
-            var stream = recorder.GetAudioPacketStream(0, 8000/50);
-            var player = new AudioPlayer();
-            var playHandle = player.PlayAudioPacketStream(0, stream.PacketSource.Delay(TimeSpan.FromSeconds(1)));
-            Thread.Sleep(10000000);
+            //var recorder = new AudioRecorder();
+            //var stream = recorder.GetAudioPacketStream(0, 8000/50);
+            //var player = new AudioPlayer();
+            //var playHandle = player.PlayAudioPacketStream(0, stream.PacketSource.Delay(TimeSpan.FromSeconds(1)));
+            //Thread.Sleep(10000000);
                 
-            return;
+            //return;
             Task.WaitAll(
-                Enumerable.Range(1, 3)
+                Enumerable.Range(1, 2)
                     .Select(x => Task.Factory.StartNew(() => Application.Run(new MainForm())))
                     .ToArray());
         }

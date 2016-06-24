@@ -124,6 +124,7 @@
             this.tbUserID.Name = "tbUserID";
             this.tbUserID.Size = new System.Drawing.Size(273, 20);
             this.tbUserID.TabIndex = 1;
+            this.tbUserID.TextChanged += new System.EventHandler(this.tbUserID_TextChanged);
             this.tbUserID.KeyDown += new System.Windows.Forms.KeyEventHandler(this.tbUserID_KeyDown);
             // 
             // btnLogout
