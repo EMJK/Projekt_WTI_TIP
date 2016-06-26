@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using Castle.DynamicProxy;
 using Newtonsoft.Json;
 
-namespace RegistrarWebApiClient
+namespace WebApiClient
 {
     class RequestInterceptor : IInterceptor
     {

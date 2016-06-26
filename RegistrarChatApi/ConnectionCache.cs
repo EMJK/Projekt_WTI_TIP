@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Julas.Utils.Extensions;
-using RegistrarCommon;
+using Common;
 
-namespace RegistrarChatApi
+namespace ChatServer
 {
     public class ConnectionCache : IConnectionCache
     {

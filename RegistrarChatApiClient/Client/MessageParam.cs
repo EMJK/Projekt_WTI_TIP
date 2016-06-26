@@ -1,4 +1,4 @@
-﻿namespace RegistrarChatApiClient
+﻿namespace ChatClient.Client
 {
     public class MessageParam
     {

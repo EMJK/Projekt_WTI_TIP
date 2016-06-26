@@ -9,7 +9,7 @@ using Nancy.Bootstrappers.Ninject;
 using Ninject;
 using Npgsql;
 
-namespace RegistrarWebApi
+namespace WebApiServer
 {
     class NinjectBootstrapper : NinjectNancyBootstrapper
     {

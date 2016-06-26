@@ -45,8 +45,8 @@
       <HintPath>..\packages\HtmlRenderer.WinForms.1.5.0.6\lib\net45\HtmlRenderer.WinForms.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Julas.Utils, Version=2.0.5.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Julas.Utils.2.0.5\lib\net452\Julas.Utils.dll</HintPath>
+    <Reference Include="Julas.Utils, Version=2.0.7.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Julas.Utils.2.0.7\lib\net452\Julas.Utils.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.AspNet.SignalR.Client, Version=2.2.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -131,7 +131,6 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SIPphone.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -142,17 +141,21 @@
       <Project>{906ee480-a1cb-4bc0-8272-5e977ac26190}</Project>
       <Name>Audio</Name>
     </ProjectReference>
-    <ProjectReference Include="..\RegistrarChatApiClient\RegistrarChatApiClient.csproj">
+    <ProjectReference Include="..\RegistrarChatApiClient\ChatClient.csproj">
       <Project>{6A733F41-9EBA-4F2D-AD95-FD1FDE3210F7}</Project>
-      <Name>RegistrarChatApiClient</Name>
+      <Name>ChatClient</Name>
     </ProjectReference>
-    <ProjectReference Include="..\RegistrarCommon\RegistrarCommon.csproj">
+    <ProjectReference Include="..\RegistrarCommon\Common.csproj">
       <Project>{3d9dcdd7-1145-420d-9931-33070a3715d3}</Project>
-      <Name>RegistrarCommon</Name>
+      <Name>Common</Name>
     </ProjectReference>
-    <ProjectReference Include="..\RegistrarWebApiClient\RegistrarWebApiClient.csproj">
+    <ProjectReference Include="..\RegistrarWebApiClient\WebApiClient.csproj">
       <Project>{6f7dd597-04a5-45af-baf2-353aca792168}</Project>
-      <Name>RegistrarWebApiClient</Name>
+      <Name>WebApiClient</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\VoipClient\VoipClient.csproj">
+      <Project>{6C9C54F7-4EAC-4055-9DB3-A4C2ABA5AEC6}</Project>
+      <Name>VoipClient</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

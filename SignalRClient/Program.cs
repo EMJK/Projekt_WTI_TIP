@@ -11,9 +11,9 @@ using System.Xml;
 using Audio;
 using Julas.Utils;
 using Microsoft.AspNet.SignalR.Client;
-using RegistrarChatApiClient;
-using RegistrarWebApiClient;
-using RegistrarWebApiClient.Models.Account;
+using ChatClient;
+using WebApiClient;
+using WebApiClient.Models.Account;
 
 namespace Client
 {

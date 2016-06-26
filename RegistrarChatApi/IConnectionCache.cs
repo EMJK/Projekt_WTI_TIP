@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace RegistrarChatApi
+namespace ChatServer
 {
     public interface IConnectionCache
     {

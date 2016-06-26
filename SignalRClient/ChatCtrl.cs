@@ -8,24 +8,29 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using RegistrarChatApiClient;
-using RegistrarWebApiClient;
-using RegistrarWebApiClient.Models.Account;
+using ChatClient;
+using ChatClient.Client;
+using ChatClient.Server;
+using VoipClient;
+using WebApiClient;
+using WebApiClient.Models.Account;
 
 
 namespace Client
 {
     public partial class ChatCtrl : UserControl
     {
-        private WebApiClient _webApiClient;
-        private ChatApiClient _chatApiClient;
-        private ConcurrentDictionary<string, ConversationForm> _forms;
+        private readonly WebApiClientModule _webApiClient;
+        private ChatClientModule _chatClient;
+        private VoipClientModule _voipClient;
+
+        private readonly ConcurrentDictionary<string, ConversationForm> _forms;
 
         public ChatCtrl()
         {
             InitializeComponent();
             SetControlsToLoginState(false);
-            _webApiClient = new WebApiClient("http://localhost:9922/");
+            _webApiClient = new WebApiClientModule("http://127.0.0.1:9922/");
             _forms = new ConcurrentDictionary<string, ConversationForm>();
         }
 
@@ -36,8 +41,8 @@ namespace Client
                 var response = _webApiClient.Account.Login(new LoginRequest() { UserID = tbUserID.Text, Password = tbPassword.Text});
                 AppendLine($"User `{tbUserID.Text}` logged in.");
                 tbSessionID.Text = response.SessionID;
-                _chatApiClient = new ChatApiClient("http://localhost:9923/", tbUserID.Text, response.SessionID);
-                _chatApiClient.Hub.SubscribeOn<MessageParam>(c => c.Message, msg =>
+                _chatClient = new ChatClientModule("http://127.0.0.1:9923/", tbUserID.Text, response.SessionID);
+                _chatClient.Hub.SubscribeOn<MessageParam>(c => c.Message, msg =>
                 {
                     Invoke(() =>
                     {
@@ -45,11 +50,12 @@ namespace Client
                         form.AppendMessageFromOtherUser(msg.Message);
                     });
                 });
-                _chatApiClient.Hub.SubscribeOn<ClientListParam>(c => c.ClientList, msg =>
+                _chatClient.Hub.SubscribeOn<ClientListParam>(c => c.ClientList, msg =>
                 {
                     Invoke(() => FillUserList(msg.Clients));
                 });
-                
+                _voipClient = new VoipClientModule("127.0.0.1", 5060);
+                _voipClient.Register(tbUserID.Text, tbPassword.Text);
                 SetControlsToLoginState(true);
             }
             catch (WebApiException ex)
@@ -72,8 +78,16 @@ namespace Client
         {
             try
             {
+                _forms.ForEach((x) =>
+                {
+                    x.Value.Close();
+                });
+                _forms.Clear();
+                _voipClient.Dispose();
+                _voipClient = null;
+                _chatClient.Dispose();
+                _chatClient = null;
                 _webApiClient.Account.Logout(new LogoutRequest() {SessionID = tbSessionID.Text});
-                //AppendLine($"User `{tbUserID.Text}` logged out.");
                 SetControlsToLoginState(false);
                 tbPassword.Clear();
                 tbSessionID.Clear();
@@ -179,11 +193,11 @@ namespace Client
             {
                 chatForm = _forms.GetOrAdd(person, _ =>
                 {
-                    var form = new ConversationForm(tbUserID.Text, person, tbPassword.Text);
+                    var form = new ConversationForm(tbUserID.Text, person, tbPassword.Text, _voipClient);
                     _forms[person] = form;
                     var msgSent = new Action<string>(msg =>
                     {
-                        _chatApiClient.Hub.Call(c => c.SendMessage(new SendMessageParam()
+                        _chatClient.Hub.Call(c => c.SendMessage(new SendMessageParam()
                         {
                             DestinationUserID = person,
                             Message = msg
@@ -206,13 +220,8 @@ namespace Client
 
         private void Invoke(Action action)
         {
-            if (this.InvokeRequired) this.Invoke(new MethodInvoker(action));
+            if (InvokeRequired) Invoke(new MethodInvoker(action));
             else action();
-        }
-
-        private void tbUserID_TextChanged(object sender, EventArgs e)
-        {
-
         }
     }
 }

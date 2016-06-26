@@ -4,7 +4,7 @@ using Ozeki.Media;
 using Ozeki.VoIP;
 using Ozeki.Common;
 
-namespace Client
+namespace VoipClient
 {
     /// <summary>
     /// Basic softphone logic.
@@ -15,7 +15,7 @@ namespace Client
     /// The Program.cs uses this class to create a softphone,
     /// uses the functions and events declared here as public.
     /// </remarks>
-    class Softphone
+    class Softphone : IDisposable
     {
         ISoftPhone _softphone;                   // softphone object
         IPhoneLine _phoneLine;                   // phone line object
@@ -33,7 +33,7 @@ namespace Client
         /// <summary>
         /// Occurs when an incoming call received.
         /// </summary>
-        public event EventHandler IncomingCall;
+        public event Action<string> IncomingCall;
 
         /// <summary>
         /// Occurs when the registration state of the phone line has changed.
@@ -151,7 +151,7 @@ namespace Client
          We send our voice through the mediaSender, and we get the other client's voice through the mediaSender to our speaker object. 
           
          To disconnect these handlers, we will use the DisconnectMedia() method.
-		           
+                   
          It is possible to use other mediahandlers with the connector, for example we can connect a WaveStreamPlayback or an MP3StreamPlayback object to the MediaSender, so we can play music/voice
          during the call. For exmaple: when can create an IVR (Interactive Voice Response), we can create voice recorder etc.
          
@@ -226,9 +226,7 @@ namespace Client
 
             DispatchAsync(() =>
             {
-                var handler = IncomingCall;
-                if (handler != null)
-                    handler(this, EventArgs.Empty);
+                IncomingCall?.Invoke(e.Item.OtherParty.UserName);
             });
         }
 
@@ -318,7 +316,15 @@ namespace Client
         {
             if (_call != null)
             {
-                _call.HangUp();
+                if (_call.IsIncoming)
+                {
+                    _incomingCall = false;    
+                    _call.Reject();
+                }
+                if (_call.IsAnswered)
+                {
+                    _call.HangUp();
+                }
                 _call = null;
             }
         }
@@ -350,6 +356,31 @@ namespace Client
         {
             var task = new WaitCallback(o => action.Invoke());
             ThreadPool.QueueUserWorkItem(task);
+        }
+
+        public void Dispose()
+        {
+            Try(() => _call?.HangUp());
+            Try(() => _softphone?.UnregisterPhoneLine(_phoneLine));
+            Try(() => _phoneLine.Dispose());
+            Try(() => _mediaReceiver.Dispose());
+            Try(() => _mediaSender.Dispose());
+            Try(() => _connector.Dispose());
+            Try(() => _speaker.Dispose());
+            Try(() => _microphone.Dispose());
+            Try(() => _softphone.Close());
+
+        }
+
+        private void Try(Action action)
+        {
+            try
+            {
+                action();
+            }
+            catch
+            {
+            }
         }
     }
 }

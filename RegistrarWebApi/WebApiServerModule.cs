@@ -6,23 +6,27 @@ using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Common;
 using Nancy;
 using Nancy.Helpers;
 using Nancy.Hosting.Self;
 using Nancy.Owin;
 using Ninject;
 
-namespace RegistrarWebApi
+namespace WebApiServer
 {
-    public class RegistrarHttpServer : IDisposable
+    public class WebApiServerModule : IDisposable
     {
         private readonly IKernel _kernel;
+        private readonly IConfig _config;
         private NancyHost _nancyHost;
 
-        public RegistrarHttpServer(string webApiUri, IKernel kernel)
+        public WebApiServerModule(IKernel kernel)
         {
             _kernel = kernel;
+            _config = _kernel.Get<IConfig>();
             _kernel.Load<Nancy.Bootstrappers.Ninject.FactoryModule>();
+            var webApiUri = $"http://{_config.LocalIP}:{_config.LocalWebApiPort}/";
             Start(webApiUri);
         }
 

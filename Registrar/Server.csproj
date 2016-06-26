@@ -7,8 +7,8 @@
     <ProjectGuid>{D10C073E-E958-4919-93F8-E7B5139FD961}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Registrar</RootNamespace>
-    <AssemblyName>Registrar</AssemblyName>
+    <RootNamespace>Server</RootNamespace>
+    <AssemblyName>Server</AssemblyName>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -39,6 +39,10 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Julas.Utils, Version=2.0.7.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Julas.Utils.2.0.7\lib\net452\Julas.Utils.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Microsoft.Owin, Version=3.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Owin.3.0.1\lib\net45\Microsoft.Owin.dll</HintPath>
       <Private>True</Private>
@@ -67,6 +71,7 @@
       <HintPath>..\packages\OzekiSDK.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Reactive.Core, Version=2.2.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -85,6 +90,7 @@
       <HintPath>..\packages\Rx-PlatformServices.2.2.5\lib\net45\System.Reactive.PlatformServices.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="System.Runtime.Caching" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -94,8 +100,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Configuration\AppConfig.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Configuration\SessionCache.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -103,21 +111,21 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\RegistrarChatApi\RegistrarChatApi.csproj">
+    <ProjectReference Include="..\RegistrarChatApi\ChatServer.csproj">
       <Project>{53600396-c5a9-4421-8ef8-a2415509be26}</Project>
-      <Name>RegistrarChatApi</Name>
+      <Name>ChatServer</Name>
     </ProjectReference>
-    <ProjectReference Include="..\RegistrarCommon\RegistrarCommon.csproj">
+    <ProjectReference Include="..\RegistrarCommon\Common.csproj">
       <Project>{3d9dcdd7-1145-420d-9931-33070a3715d3}</Project>
-      <Name>RegistrarCommon</Name>
+      <Name>Common</Name>
     </ProjectReference>
-    <ProjectReference Include="..\RegistrarSipApi\RegistrarSipApi.csproj">
+    <ProjectReference Include="..\RegistrarSipApi\VoipServer.csproj">
       <Project>{49bcb3cf-3dfc-4b08-a845-7e66c8ab4dcf}</Project>
-      <Name>RegistrarSipApi</Name>
+      <Name>VoipServer</Name>
     </ProjectReference>
-    <ProjectReference Include="..\RegistrarWebApi\RegistrarWebApi.csproj">
+    <ProjectReference Include="..\RegistrarWebApi\WebApiServer.csproj">
       <Project>{efd601ba-26e2-4150-b1ad-363cdf9e1df0}</Project>
-      <Name>RegistrarWebApi</Name>
+      <Name>WebApiServer</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

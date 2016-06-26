@@ -1,4 +1,4 @@
-﻿namespace RegistrarWebApiClient.Models.Account
+﻿namespace WebApiClient.Models.Account
 {
     public class LogoutResponse
     {

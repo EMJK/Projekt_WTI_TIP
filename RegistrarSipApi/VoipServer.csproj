@@ -4,18 +4,16 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{EFD601BA-26E2-4150-B1AD-363CDF9E1DF0}</ProjectGuid>
+    <ProjectGuid>{49BCB3CF-3DFC-4B08-A845-7E66C8AB4DCF}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>RegistrarWebApi</RootNamespace>
-    <AssemblyName>RegistrarWebApi</AssemblyName>
+    <RootNamespace>VoipServer</RootNamespace>
+    <AssemblyName>VoipServer</AssemblyName>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -25,7 +23,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -33,45 +30,52 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  <PropertyGroup>
-    <StartupObject />
-  </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Julas.Utils, Version=2.0.5.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Julas.Utils.2.0.5\lib\net452\Julas.Utils.dll</HintPath>
+    <Reference Include="Julas.Utils, Version=2.0.7.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Julas.Utils.2.0.7\lib\net452\Julas.Utils.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Nancy, Version=1.4.2.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Nancy.1.4.3\lib\net40\Nancy.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Nancy.Bootstrappers.Ninject, Version=1.4.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Nancy.Bootstrappers.Ninject.1.4.1\lib\net40\Nancy.Bootstrappers.Ninject.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Nancy.Hosting.Self, Version=1.4.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Nancy.Hosting.Self.1.4.1\lib\net40\Nancy.Hosting.Self.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.8.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="log4net, Version=1.2.15.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
+      <HintPath>..\packages\log4net.2.0.5\lib\net45-full\log4net.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Ninject, Version=3.2.0.0, Culture=neutral, PublicKeyToken=c7192dc5380945e7, processorArchitecture=MSIL">
       <HintPath>..\packages\Ninject.3.2.2.0\lib\net45-full\Ninject.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Ninject.Extensions.ChildKernel, Version=3.2.0.0, Culture=neutral, PublicKeyToken=c7192dc5380945e7, processorArchitecture=MSIL">
-      <HintPath>..\packages\Ninject.Extensions.ChildKernel.3.2.0.0\lib\net45-full\Ninject.Extensions.ChildKernel.dll</HintPath>
+    <Reference Include="Npgsql">
+      <HintPath>lib\Npgsql.dll</HintPath>
+    </Reference>
+    <Reference Include="OzekiSDK">
+      <HintPath>..\packages\OzekiSDK.dll</HintPath>
+    </Reference>
+    <Reference Include="SIPSorcery.Net, Version=1.5.0.35789, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\SIPSorcery.1.5.5\lib\net46\SIPSorcery.Net.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Npgsql, Version=3.1.2.0, Culture=neutral, PublicKeyToken=5d8b90d52f46fda7, processorArchitecture=MSIL">
-      <HintPath>..\packages\Npgsql.3.1.2\lib\net451\Npgsql.dll</HintPath>
+    <Reference Include="SIPSorcery.SIP.App, Version=1.5.0.35791, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\SIPSorcery.1.5.5\lib\net46\SIPSorcery.SIP.App.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="SIPSorcery.SIP.Core, Version=1.5.0.37141, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\SIPSorcery.1.5.5\lib\net46\SIPSorcery.SIP.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="SIPSorcery.Sys, Version=1.5.0.37141, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\SIPSorcery.1.5.5\lib\net46\SIPSorcery.Sys.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Data.Linq" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.ServiceModel.Web" />
+    <Reference Include="System.Transactions" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.ApplicationServices" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -80,24 +84,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ModuleBase.cs" />
-    <Compile Include="Modules\Account.cs" />
-    <Compile Include="NinjectBootstrapper.cs" />
-    <Compile Include="RegistrarHttpServer.cs" />
+    <Compile Include="Database.cs" />
+    <Compile Include="VoipServerModule.cs" />
+    <Compile Include="SipServer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\RegistrarCommon\RegistrarCommon.csproj">
+    <ProjectReference Include="..\RegistrarCommon\Common.csproj">
       <Project>{3D9DCDD7-1145-420D-9931-33070A3715D3}</Project>
-      <Name>RegistrarCommon</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\RegistrarWebApiClient\RegistrarWebApiClient.csproj">
-      <Project>{6f7dd597-04a5-45af-baf2-353aca792168}</Project>
-      <Name>RegistrarWebApiClient</Name>
+      <Name>Common</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

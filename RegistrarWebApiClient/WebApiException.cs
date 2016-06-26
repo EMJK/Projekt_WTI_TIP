@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace RegistrarWebApiClient
+namespace WebApiClient
 {
     public class WebApiException : Exception
     {

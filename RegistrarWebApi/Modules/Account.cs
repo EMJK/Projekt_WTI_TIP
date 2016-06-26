@@ -5,12 +5,12 @@ using Julas.Utils;
 using Julas.Utils.Extensions;
 using Npgsql;
 using NpgsqlTypes;
-using RegistrarCommon;
-using RegistrarWebApiClient;
-using RegistrarWebApiClient.Interfaces;
-using RegistrarWebApiClient.Models.Account;
+using Common;
+using WebApiClient;
+using WebApiClient.Interfaces;
+using WebApiClient.Models.Account;
 
-namespace RegistrarWebApi.Modules
+namespace WebApiServer.Modules
 {
     public class Account : ModuleBase, IAccount
     {

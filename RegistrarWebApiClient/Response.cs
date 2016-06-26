@@ -1,4 +1,4 @@
-﻿namespace RegistrarWebApiClient
+﻿namespace WebApiClient
 {
     public class Response<T>
     {

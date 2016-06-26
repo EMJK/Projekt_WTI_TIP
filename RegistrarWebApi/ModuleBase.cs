@@ -11,9 +11,9 @@ using Julas.Utils;
 using Nancy;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
-using RegistrarWebApiClient;
+using WebApiClient;
 
-namespace RegistrarWebApi
+namespace WebApiServer
 {
     public abstract class ModuleBase : NancyModule
     {

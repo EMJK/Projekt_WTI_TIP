@@ -1,14 +1,14 @@
 ﻿using Castle.DynamicProxy;
-using RegistrarWebApiClient.Interfaces;
+using WebApiClient.Interfaces;
 
-namespace RegistrarWebApiClient
+namespace WebApiClient
 {
-    public class WebApiClient
+    public class WebApiClientModule
     {
         private readonly ProxyGenerator _proxyGenerator;
         private readonly IInterceptor _interceptor;
 
-        public WebApiClient(string baseUrl)
+        public WebApiClientModule(string baseUrl)
         {
             _proxyGenerator = new ProxyGenerator();
             _interceptor = new RequestInterceptor(baseUrl);

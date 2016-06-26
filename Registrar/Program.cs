@@ -1,51 +1,35 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Owin.Hosting;
 using Ninject;
-using Owin;
-using RegistrarChatApi;
-using RegistrarCommon;
-using RegistrarSipApi;
-using RegistrarWebApi;
 using Ozeki.Network;
+using ChatServer;
+using Common;
+using VoipServer;
+using WebApiServer;
 
-namespace Registrar
+namespace Server
 {
     class Program
     {
-        private static readonly SessionCache Cache = new SessionCache(TimeSpan.FromMinutes(5));
-
         static void Main(string[] args)
         {
-            string host = "localhost";
-            int webApiPort = 9922;
-            int sipPort = 5060;
-            int chatApiPort = 9923;
+            Console.WriteLine("Starting server...");
 
-            var webApiUri = $"http://{host}:{webApiPort}/";
-            var chatApiUri = $"http://{host}:{chatApiPort}/";
-
-            var sipserver = new SipServer(NetworkAddressHelper.GetLocalIP().ToString(), 20000, 20500);
-            sipserver.Start();
-
-            var kernel = GetNinjectKernel();
-
-            sipserver.Start();
-            //using (new RegistrarHttpServer(webApiUri, kernel))
-            //using (new RegistrarSignalRServer(chatApiUri, kernel))
-            //using (new RegistrarSipServer(host, sipPort, kernel))
+            var kernel = CreateNinjectKernel();
+            
+            using (new WebApiServerModule(kernel))
+            using (new ChatServerModule(kernel))
+            using (new VoipServerModule(kernel))
             {
+                Console.WriteLine("All modules started. Press ENTER to exit...");
                 Console.ReadLine();
             }
         }
 
-        private static IKernel GetNinjectKernel()
+        private static IKernel CreateNinjectKernel()
         {
             var kernel = new StandardKernel();
-            kernel.Bind<ISessionCache>().ToMethod(c => Cache);
+            kernel.Bind<ISessionCache>().ToConstant(new SessionCache(TimeSpan.FromMinutes(5))).InSingletonScope();
+            kernel.Bind<IConfig>().ToConstant(new AppConfig()).InSingletonScope();
             return kernel;
         }
     }

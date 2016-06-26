@@ -7,16 +7,20 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Julas.Utils;
 using Julas.Utils.Collections;
 using Julas.Utils.Extensions;
 using TheArtOfDev.HtmlRenderer.WinForms;
 using Ozeki.VoIP;
+using VoipClient;
 
 
 namespace Client
 {
     public partial class ConversationForm : Form
     {
+        private volatile bool _isInCall = false;
+
         private readonly string _thisUserId;
         private readonly string _otherUserId;
         private readonly HtmlPanel _htmlPanel;
@@ -26,31 +30,72 @@ namespace Client
         private readonly Color _thisUserColor = Color.DodgerBlue;
         private readonly Color _otherUserColor = Color.DarkOrange;
         private readonly int _fontSize = 1;
-        static ConversationForm me;
+
+        private readonly VoipClientModule _voipClient;
 
         public event Action<string> MessageSent;
         public event Action Call;
         public event Action HangUp;
 
-        private static Softphone _mySoftphone; // softphone object
-
-        public ConversationForm(string thisUserId, string otherUserId, string hash_pass)
+        public ConversationForm(string thisUserId, string otherUserId, string hash_pass, VoipClientModule voipClient)
         {
             _thisUserId = thisUserId;
             _otherUserId = otherUserId;
+            _voipClient = voipClient;
             InitializeComponent();
             this.Text = $"Conversation with {otherUserId}";
             _htmlPanel = new HtmlPanel();
             panel1.Controls.Add(_htmlPanel);
-            me = this;
             _htmlPanel.Dock = DockStyle.Fill;           
-            InitSoftphone();
-            ReadRegisterInfos(thisUserId, hash_pass);
+            _voipClient.PhoneStateChanged += VoipClientOnPhoneStateChanged;
         }
-        
-        public void btnCallEnable(bool on)
+
+        public new void Dispose()
         {
-            btnCall.Enabled = on;
+            _voipClient.PhoneStateChanged -= VoipClientOnPhoneStateChanged;
+            base.Dispose(true);
+        }
+
+        private void VoipClientOnPhoneStateChanged(PhoneState phoneState)
+        {
+            Invoke(new MethodInvoker(() =>
+            {
+                if (!phoneState.OtherUserId.IsOneOf(null, _otherUserId))
+                {
+                    btnCall.Enabled = false;
+                    btnCall.Text = "Phone in use";
+                    return;
+                }
+
+                if (phoneState.Status.IsOneOf(PhoneStatus.Registering, PhoneStatus.Registered))
+                {
+                    btnCall.Enabled = false;
+                    btnCall.Text = "Phone not ready";
+                }
+                else
+                {
+                    btnCall.Enabled = true;
+                    switch (phoneState.Status)
+                    {
+                        case PhoneStatus.Calling:
+                        case PhoneStatus.InCall:
+                        {
+                            btnCall.Text = "Hang up";
+                            break;
+                        }
+                        case PhoneStatus.IncomingCall:
+                        {
+                            btnCall.Text = "Answer call";
+                            break;
+                        }
+                        case PhoneStatus.Registered:
+                        {
+                            btnCall.Text = "Make call";
+                            break;
+                        }
+                    }
+                }
+            }));
         }
 
         public void AppendMessageFromOtherUser(string message)
@@ -108,70 +153,26 @@ namespace Client
 
         private void btnCall_Click(object sender, EventArgs e)
         {
-            _mySoftphone.StartCall(_otherUserId);
-        }
-
-        private static void InitSoftphone()
-        {
-            _mySoftphone = new Softphone();
-            _mySoftphone.PhoneLineStateChanged += mySoftphone_PhoneLineStateChanged;
-            _mySoftphone.CallStateChanged += mySoftphone_CallStateChanged;
-            _mySoftphone.IncomingCall += mySoftphone_IncomingCall;
-        }
-
-        private static void ReadRegisterInfos(string user, string pass)
-        {
-            var registrationRequired = true;
-            var authenticationId = user;
-
-            var userName = user;
-
-            var displayName = user;
-
-            var registerPassword = pass;
-
-            var domainHost = "10.0.0.3";
-
-            int domainPort = 5060;
-
-            // When every information has been given, we are trying to register to the serer with the softphone's Register() method.
-            _mySoftphone.Register(registrationRequired, displayName, userName, authenticationId, registerPassword,
-                                 domainHost, domainPort);
-        }
-
-        private static void mySoftphone_CallStateChanged(object sender, CallStateChangedArgs e)
-        {
-            Console.WriteLine("Call state changed: {0}", e.State);
-
-            if (e.State.IsInCall())
-                me.btnCallEnable(false);
-            else
-                me.btnCallEnable(true);
-        }
-
-        static void mySoftphone_PhoneLineStateChanged(object sender, RegistrationStateChangedArgs e)
-        {
-            Console.WriteLine("Phone line state changed: {0}", e.State);
-
-            if (e.State == RegState.Error || e.State == RegState.NotRegistered)
+            btnCall.Enabled = false;
+            switch (_voipClient.PhoneState.Status)
             {
-                MessageBox.Show("Failed to register, insert valid data");
+                case PhoneStatus.Calling:
+                case PhoneStatus.InCall:
+                {
+                    _voipClient.EndCall();
+                    break;
+                }
+                case PhoneStatus.IncomingCall:
+                {
+                    _voipClient.AnswerCall();
+                    break;
+                }
+                case PhoneStatus.Registered:
+                {
+                    _voipClient.StartCall(_otherUserId);
+                    break;
+                }
             }
-            else if (e.State == RegState.RegistrationSucceeded)
-            {
-                me.btnCallEnable(true);
-            }
-        }
-
-        static void mySoftphone_IncomingCall(object sender, EventArgs e)
-        {
-            DialogResult result = MessageBox.Show("New incoming call from" + me._otherUserId + ". Answer?", "Incoming Call", MessageBoxButtons.YesNo);
-            Console.WriteLine("\nIncoming call!");
-            Console.WriteLine("Call accepted.");
-            if (result == DialogResult.Yes)
-                _mySoftphone.AcceptCall();
-            else
-                _mySoftphone.HangUp();
         }
     }
 }

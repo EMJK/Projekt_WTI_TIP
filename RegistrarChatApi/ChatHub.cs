@@ -9,20 +9,22 @@ using System.Threading.Tasks;
 using Microsoft.AspNet.SignalR;
 using Microsoft.AspNet.SignalR.Hubs;
 using Ninject;
-using RegistrarChatApiClient;
-using RegistrarCommon;
+using ChatClient;
+using ChatClient.Client;
+using ChatClient.Server;
+using Common;
 
-namespace RegistrarChatApi
+namespace ChatServer
 {
     public class ChatHub : Hub<IClientMethods>, IServerMethods
     {
         private readonly IConnectionCache _connectionCache;
-        private readonly RegistrarSignalRServer _server;
+        private readonly ChatServerModule _serverModule;
 
         public ChatHub()
         {
-            _connectionCache = RegistrarSignalRServer.Kernel.Get<IConnectionCache>();
-            _server = RegistrarSignalRServer.Kernel.Get<RegistrarSignalRServer>();
+            _connectionCache = ChatServerModule.Kernel.Get<IConnectionCache>();
+            _serverModule = ChatServerModule.Kernel.Get<ChatServerModule>();
         }
 
         private Connection GetCurrentConnection()
@@ -40,21 +42,21 @@ namespace RegistrarChatApi
             _connectionCache.Verify(GetCurrentConnection());
             await base.OnConnected();
 
-            _server.SendClientList();
+            _serverModule.SendClientList();
         }
 
         public override async Task OnReconnected()
         {
             _connectionCache.Verify(GetCurrentConnection());
             await base.OnReconnected();
-            _server.SendClientList();
+            _serverModule.SendClientList();
         }
 
         public override async Task OnDisconnected(bool stopCalled)
         {
             _connectionCache.RemoveConnectionForConnectionID(Context.ConnectionId);
             await base.OnDisconnected(stopCalled);
-            _server.SendClientList();
+            _serverModule.SendClientList();
         }
 
         public void SendMessage(SendMessageParam param)

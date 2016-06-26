@@ -1,33 +1,35 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.24720.0
+VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RegistrarWebApi", "RegistrarWebApi\RegistrarWebApi.csproj", "{EFD601BA-26E2-4150-B1AD-363CDF9E1DF0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApiServer", "RegistrarWebApi\WebApiServer.csproj", "{EFD601BA-26E2-4150-B1AD-363CDF9E1DF0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Registrar", "Registrar\Registrar.csproj", "{D10C073E-E958-4919-93F8-E7B5139FD961}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Server", "Registrar\Server.csproj", "{D10C073E-E958-4919-93F8-E7B5139FD961}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "lib", "lib", "{4075CA0C-EE34-46D7-946D-74F780D38693}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RegistrarSipApi", "RegistrarSipApi\RegistrarSipApi.csproj", "{49BCB3CF-3DFC-4B08-A845-7E66C8AB4DCF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VoipServer", "RegistrarSipApi\VoipServer.csproj", "{49BCB3CF-3DFC-4B08-A845-7E66C8AB4DCF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RegistrarChatApi", "RegistrarChatApi\RegistrarChatApi.csproj", "{53600396-C5A9-4421-8EF8-A2415509BE26}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatServer", "RegistrarChatApi\ChatServer.csproj", "{53600396-C5A9-4421-8EF8-A2415509BE26}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Client", "SignalRClient\Client.csproj", "{343CF585-9724-4C7E-995E-2F023C20391B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RegistrarCommon", "RegistrarCommon\RegistrarCommon.csproj", "{3D9DCDD7-1145-420D-9931-33070A3715D3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "RegistrarCommon\Common.csproj", "{3D9DCDD7-1145-420D-9931-33070A3715D3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RegistrarWebApiClient", "RegistrarWebApiClient\RegistrarWebApiClient.csproj", "{6F7DD597-04A5-45AF-BAF2-353ACA792168}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApiClient", "RegistrarWebApiClient\WebApiClient.csproj", "{6F7DD597-04A5-45AF-BAF2-353ACA792168}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WebApi", "WebApi", "{C66FC2F3-C3E6-4E0B-86D0-03F0F1E0D5DB}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Web", "Web", "{C66FC2F3-C3E6-4E0B-86D0-03F0F1E0D5DB}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ChatApi", "ChatApi", "{AB5F37EA-C65E-45DE-83AF-E8659573A313}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Chat", "Chat", "{AB5F37EA-C65E-45DE-83AF-E8659573A313}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RegistrarChatApiClient", "RegistrarChatApiClient\RegistrarChatApiClient.csproj", "{6A733F41-9EBA-4F2D-AD95-FD1FDE3210F7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatClient", "RegistrarChatApiClient\ChatClient.csproj", "{6A733F41-9EBA-4F2D-AD95-FD1FDE3210F7}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SipApi", "SipApi", "{D2980A13-6E4C-421D-86A7-3EABD94D0DA8}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Voip", "Voip", "{D2980A13-6E4C-421D-86A7-3EABD94D0DA8}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Audio", "Audio\Audio.csproj", "{906EE480-A1CB-4BC0-8272-5E977AC26190}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VoipClient", "VoipClient\VoipClient.csproj", "{6C9C54F7-4EAC-4055-9DB3-A4C2ABA5AEC6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -71,6 +73,10 @@ Global
 		{906EE480-A1CB-4BC0-8272-5E977AC26190}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{906EE480-A1CB-4BC0-8272-5E977AC26190}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{906EE480-A1CB-4BC0-8272-5E977AC26190}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6C9C54F7-4EAC-4055-9DB3-A4C2ABA5AEC6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6C9C54F7-4EAC-4055-9DB3-A4C2ABA5AEC6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6C9C54F7-4EAC-4055-9DB3-A4C2ABA5AEC6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6C9C54F7-4EAC-4055-9DB3-A4C2ABA5AEC6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -86,5 +92,6 @@ Global
 		{6A733F41-9EBA-4F2D-AD95-FD1FDE3210F7} = {AB5F37EA-C65E-45DE-83AF-E8659573A313}
 		{D2980A13-6E4C-421D-86A7-3EABD94D0DA8} = {4075CA0C-EE34-46D7-946D-74F780D38693}
 		{906EE480-A1CB-4BC0-8272-5E977AC26190} = {4075CA0C-EE34-46D7-946D-74F780D38693}
+		{6C9C54F7-4EAC-4055-9DB3-A4C2ABA5AEC6} = {D2980A13-6E4C-421D-86A7-3EABD94D0DA8}
 	EndGlobalSection
 EndGlobal

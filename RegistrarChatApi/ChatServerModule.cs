@@ -9,27 +9,31 @@ using Microsoft.Owin.Cors;
 using Microsoft.Owin.Hosting;
 using Ninject;
 using Owin;
-using RegistrarChatApiClient;
-using RegistrarCommon;
+using ChatClient;
+using ChatClient.Client;
+using Common;
 
-namespace RegistrarChatApi
+namespace ChatServer
 {
-    public class RegistrarSignalRServer : IDisposable
+    public class ChatServerModule : IDisposable
     {
         private readonly object _clientListLock = new object();
         internal static IKernel Kernel;
         private IDisposable _webApp;
         private readonly ISessionCache _sessionCache;
         private readonly IConnectionCache _connectionCache;
+        private readonly IConfig _config;
 
-        public RegistrarSignalRServer(string chatApiUri, IKernel kernel)
+        public ChatServerModule(IKernel kernel)
         {
             Kernel = kernel;
+            _config = kernel.Get<IConfig>();
             _sessionCache = Kernel.Get<ISessionCache>();
             _connectionCache = new ConnectionCache(_sessionCache);
             Kernel.Bind<IConnectionCache>().ToMethod(x => _connectionCache);
-            Kernel.Bind<RegistrarSignalRServer>().ToMethod(x => this);
+            Kernel.Bind<ChatServerModule>().ToMethod(x => this);
             _sessionCache.SessionClosed += SessionCacheOnSessionClosed;
+            var chatApiUri = $"http://{_config.LocalIP}:{_config.LocalChatPort}/";
             _webApp = WebApp.Start(chatApiUri, Configuration);
             Console.WriteLine($"Chat server started at {chatApiUri}");
         }

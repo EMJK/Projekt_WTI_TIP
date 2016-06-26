@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace RegistrarCommon
+namespace Common
 {
     public interface ISessionCache
     {

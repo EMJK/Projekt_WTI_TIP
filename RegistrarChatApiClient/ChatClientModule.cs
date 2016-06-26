@@ -6,12 +6,14 @@ using System.Text;
 using System.Threading.Tasks;
 using Castle.Core.Internal;
 using Castle.DynamicProxy;
+using ChatClient.Client;
+using ChatClient.Server;
 using Microsoft.AspNet.SignalR.Client;
-using RegistrarCommon;
+using Common;
 
-namespace RegistrarChatApiClient
+namespace ChatClient
 {
-    public class ChatApiClient : IDisposable
+    public class ChatClientModule : IDisposable
     {
         private string _conID;
         private readonly HubConnection _connection;
@@ -19,7 +21,7 @@ namespace RegistrarChatApiClient
 
 
 
-        public ChatApiClient(string baseUrl, string userID, string sessionID)
+        public ChatClientModule(string baseUrl, string userID, string sessionID)
         {
             var queryString = new Dictionary<string, string>
             {

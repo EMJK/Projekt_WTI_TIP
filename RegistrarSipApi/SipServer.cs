@@ -7,105 +7,36 @@ using System.Net;
 using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Data;
-
-using Npgsql;
 using System.Linq;
 using Ozeki.Network;
 using Ozeki.VoIP;
 
-namespace RegistrarSipApi
+namespace VoipServer
 {
-    public class DBpart
-    {
-        public NpgsqlConnection connection;
-
-        public void CreateConnection()
-        {
-            string connstring = String.Format("Server=127.0.0.1;Port=5432;" +
-                                "User Id=postgres;Password=EmiSUser;Database=Registrar_DB;");
-            connection = new NpgsqlConnection(connstring);
-            connection.Open();
-        }
-
-        public DataTable GetDataFromDB(string command, string paramName, string paramValue)
-        {
-            CreateConnection();
-            DataTable dt = new DataTable(); // DataTable instance named dt
-            NpgsqlDataReader dr; // NpgsqlDataReader object declaration named dr
-            NpgsqlCommand sqlc; // NpgsqlCommand object declaration
-            sqlc = new NpgsqlCommand(command); // NpgsqlCommand instance
-
-            NpgsqlParameter par = new NpgsqlParameter(paramName, paramValue);
-            sqlc.Parameters.Add(par);
-
-            try
-            {
-                sqlc.Connection = this.connection; // connection to DB
-                dr = sqlc.ExecuteReader(); // query execution and creation of dr pointer
-                dt.Load(dr); //load data to dataTable object
-                connection.Close();
-                return dt; // return data
-            }
-            catch
-            { return null; }
-        }
-
-        public int WriteDataToDB(string command, string paramName, object paramValue)
-        {
-            CreateConnection();
-            NpgsqlCommand sqlc; // Declaration of NpgsqlCommand object
-            sqlc = new NpgsqlCommand(command); // NpgsqlCommand instance to execute query
-
-            sqlc.Connection = this.connection; // connection to DB
-            NpgsqlParameter par = new NpgsqlParameter(paramName, paramValue);
-            sqlc.Parameters.Add(par);
-            int result = sqlc.ExecuteNonQuery();
-            connection.Close();
-            return result;
-        }
-
-        public int WriteDataToDB(string command, Dictionary<string, object> parameters)
-        {
-            CreateConnection();
-            NpgsqlCommand sqlc; // Declaration of NpgsqlCommand object
-            sqlc = new NpgsqlCommand(command); // NpgsqlCommand instance to execute query
-
-            sqlc.Connection = this.connection; // connection to DB
-            foreach (KeyValuePair<string, object> parameter in parameters)
-            {
-                NpgsqlParameter par = new NpgsqlParameter(parameter.Key, parameter.Value);
-                sqlc.Parameters.Add(par);
-            }
-            int result = sqlc.ExecuteNonQuery();
-            connection.Close();
-            return result;
-        }
-
-    }
-
     public class SipServer : PBXBase
     {
-        Dictionary<string, NpgsqlTypes.NpgsqlDateTime> CallStart = new Dictionary<string, NpgsqlTypes.NpgsqlDateTime>();
+        private readonly Dictionary<string, NpgsqlTypes.NpgsqlDateTime> CallStart = new Dictionary<string, NpgsqlTypes.NpgsqlDateTime>();
 
-        string _localAddress;
-        DBpart DBobject;
+        private readonly string _localAddress;
+        private readonly Database _database;
+        private readonly int _localPort;
 
-        public SipServer(string localAddress, int minPortRange, int maxPortRange)
-            : base(minPortRange, maxPortRange)
+        public SipServer(string localAddress, int localPort, int minRtpPort, int maxRtpPort, string dbConnectionString)
+            : base(minRtpPort, maxRtpPort)
         {
             _localAddress = localAddress;
+            _localPort = localPort;
             Console.WriteLine("SipServer starting...");
-            Console.WriteLine("Local address: " + localAddress);
 
-            DBobject = new DBpart();
+            _database = new Database(dbConnectionString);
         }
 
         protected override void OnStart()
         {
-            Console.WriteLine("SipServer started.");
-            SetListenPort(_localAddress, 5060, Ozeki.Network.TransportType.Udp);
+            SetListenPort(_localAddress, _localPort, Ozeki.Network.TransportType.Udp);
 
-            Console.WriteLine("Listened port: 5060(UDP)");
+            Console.WriteLine("SipServer started.");
+            Console.WriteLine($"Local address: {_localAddress}:{_localPort} (UDP)");
 
             base.OnStart();
         }
@@ -119,7 +50,7 @@ namespace RegistrarSipApi
             string user = extension.ExtensionID;
             //Get user's password from db
             string command = "select password_hash from users where username = @user and status = 'A';";
-            DataTable table = DBobject.GetDataFromDB(command, "@user", user);
+            DataTable table = _database.GetDataFromDB(command, "@user", user);
             if (table.Rows != null && table.Rows.Count > 0 && table.Rows[0].ItemArray.Any())
             {
                 string pass = table.Rows[0].ItemArray[0].ToString();
@@ -161,7 +92,7 @@ namespace RegistrarSipApi
             string command = "UPDATE registrar_table  SET domain = @domain, contact = @contact, received = @received, expires = @expires WHERE username = @username;"
                       + "insert into registrar_table (username, domain, contact, received, expires)"
                       + " select @username, @domain, @contact, @received, @expires where not exists (select from registrar_table where username = @username);";
-            DBobject.WriteDataToDB(command, parameters);
+            _database.WriteDataToDB(command, parameters);
             return base.OnRegisterReceived(extension, from, expires);
         }
 
@@ -201,7 +132,7 @@ namespace RegistrarSipApi
                     string command = "insert into billing (calling_user_id, called_user_id, source_ip, start_billing, stop_billing, call_id)"
                                  + "values(@calling_user_id, @called_user_id, @source_ip, @start_billing, @stop_billing, @call_id)";
 
-                    DBobject.WriteDataToDB(command, parameters);
+                    _database.WriteDataToDB(command, parameters);
 
                     CallStart.Remove(call1.CallID);
                 }

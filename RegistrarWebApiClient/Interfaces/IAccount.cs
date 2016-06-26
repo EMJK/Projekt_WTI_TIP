@@ -1,6 +1,6 @@
-using RegistrarWebApiClient.Models.Account;
+using WebApiClient.Models.Account;
 
-namespace RegistrarWebApiClient.Interfaces
+namespace WebApiClient.Interfaces
 {
     public interface IAccount
     {

@@ -7,8 +7,8 @@
     <ProjectGuid>{53600396-C5A9-4421-8EF8-A2415509BE26}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>RegistrarChatApi</RootNamespace>
-    <AssemblyName>RegistrarChatApi</AssemblyName>
+    <RootNamespace>ChatServer</RootNamespace>
+    <AssemblyName>ChatServer</AssemblyName>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -31,8 +31,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Julas.Utils, Version=2.0.5.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Julas.Utils.2.0.5\lib\net452\Julas.Utils.dll</HintPath>
+    <Reference Include="Julas.Utils, Version=2.0.7.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Julas.Utils.2.0.7\lib\net452\Julas.Utils.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.AspNet.SignalR.Core, Version=2.2.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -93,7 +93,7 @@
     <Compile Include="Connection.cs" />
     <Compile Include="ConnectionCache.cs" />
     <Compile Include="IConnectionCache.cs" />
-    <Compile Include="RegistrarSignalRServer.cs" />
+    <Compile Include="ChatServerModule.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -101,13 +101,13 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\RegistrarChatApiClient\RegistrarChatApiClient.csproj">
+    <ProjectReference Include="..\RegistrarChatApiClient\ChatClient.csproj">
       <Project>{6a733f41-9eba-4f2d-ad95-fd1fde3210f7}</Project>
-      <Name>RegistrarChatApiClient</Name>
+      <Name>ChatClient</Name>
     </ProjectReference>
-    <ProjectReference Include="..\RegistrarCommon\RegistrarCommon.csproj">
+    <ProjectReference Include="..\RegistrarCommon\Common.csproj">
       <Project>{3D9DCDD7-1145-420D-9931-33070A3715D3}</Project>
-      <Name>RegistrarCommon</Name>
+      <Name>Common</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
