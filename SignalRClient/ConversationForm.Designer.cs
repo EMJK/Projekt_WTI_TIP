@@ -118,6 +118,7 @@
             this.Controls.Add(this.groupBox1);
             this.Name = "ConversationForm";
             this.Text = "Rozmowa";
+            this.Load += new System.EventHandler(this.ConversationForm_Load);
             this.groupBox1.ResumeLayout(false);
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();

@@ -21,6 +21,7 @@ namespace VoipClient
 
         public VoipClientModule(string serverIp, int serverPort)
         {
+            PhoneState = new PhoneState {Status = PhoneStatus.Unregistered, OtherUserId = null};
             _softphone = new Softphone();
             _serverIp = serverIp;
             _serverPort = serverPort;

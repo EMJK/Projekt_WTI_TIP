@@ -55,12 +55,21 @@ namespace Client
                     Invoke(() => FillUserList(msg.Clients));
                 });
                 _voipClient = new VoipClientModule("127.0.0.1", 5060);
+                _voipClient.PhoneStateChanged += VoipClientOnPhoneStateChanged;
                 _voipClient.Register(tbUserID.Text, tbPassword.Text);
                 SetControlsToLoginState(true);
             }
             catch (WebApiException ex)
             {
                 AppendLine($"Could not log in: {ex.ResponseCode} {ex.ResponseMessage}");
+            }
+        }
+
+        private void VoipClientOnPhoneStateChanged(PhoneState phoneState)
+        {
+            if (phoneState.Status == PhoneStatus.IncomingCall)
+            {
+                StartConversation(phoneState.OtherUserId);
             }
         }
 
@@ -83,6 +92,7 @@ namespace Client
                     x.Value.Close();
                 });
                 _forms.Clear();
+                _voipClient.PhoneStateChanged -= VoipClientOnPhoneStateChanged;
                 _voipClient.Dispose();
                 _voipClient = null;
                 _chatClient.Dispose();

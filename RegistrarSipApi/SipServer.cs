@@ -70,7 +70,6 @@ namespace VoipServer
 
         protected override RegisterResult OnRegisterReceived(ISIPExtension extension, SIPAddress from, int expires)
         {
-
             Console.WriteLine("Register received from: " + extension.ExtensionID);
             //Save location to DB
             Dictionary<string, object> parameters = new Dictionary<string, object>();

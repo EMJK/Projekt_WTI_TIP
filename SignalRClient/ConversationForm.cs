@@ -174,5 +174,10 @@ namespace Client
                 }
             }
         }
+
+        private void ConversationForm_Load(object sender, EventArgs e)
+        {
+            VoipClientOnPhoneStateChanged(_voipClient.PhoneState);
+        }
     }
 }
