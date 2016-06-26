@@ -28,7 +28,7 @@ namespace VoipClient
             AttachEvents();
         }
 
-        public void Register(string thisUserId, string thisUserPasswordHash)
+        public void Register(string thisUserId, string sessionId)
         {
             lock (_lockObj)
             {
@@ -38,8 +38,8 @@ namespace VoipClient
                     true,
                     thisUserId,
                     thisUserId,
-                    thisUserId,
-                    thisUserPasswordHash,
+                    sessionId,
+                    string.Empty,
                     _serverIp,
                     _serverPort);
             }

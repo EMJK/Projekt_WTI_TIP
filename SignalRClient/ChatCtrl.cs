@@ -23,6 +23,7 @@ namespace Client
         private readonly WebApiClientModule _webApiClient;
         private ChatClientModule _chatClient;
         private VoipClientModule _voipClient;
+        private readonly Config _config = new Config();
 
         private readonly ConcurrentDictionary<string, ConversationForm> _forms;
 
@@ -30,7 +31,7 @@ namespace Client
         {
             InitializeComponent();
             SetControlsToLoginState(false);
-            _webApiClient = new WebApiClientModule("http://127.0.0.1:9922/");
+            _webApiClient = new WebApiClientModule($"http://{_config.ServerIP}:{_config.WebApiPort}/");
             _forms = new ConcurrentDictionary<string, ConversationForm>();
         }
 
@@ -41,7 +42,7 @@ namespace Client
                 var response = _webApiClient.Account.Login(new LoginRequest() { UserID = tbUserID.Text, Password = tbPassword.Text});
                 AppendLine($"User `{tbUserID.Text}` logged in.");
                 tbSessionID.Text = response.SessionID;
-                _chatClient = new ChatClientModule("http://127.0.0.1:9923/", tbUserID.Text, response.SessionID);
+                _chatClient = new ChatClientModule($"http://{_config.ServerIP}:{_config.ChatPort}/", tbUserID.Text, response.SessionID);
                 _chatClient.Hub.SubscribeOn<MessageParam>(c => c.Message, msg =>
                 {
                     Invoke(() =>
@@ -54,9 +55,9 @@ namespace Client
                 {
                     Invoke(() => FillUserList(msg.Clients));
                 });
-                _voipClient = new VoipClientModule("127.0.0.1", 5060);
+                _voipClient = new VoipClientModule(_config.ServerIP, _config.SipPort);
                 _voipClient.PhoneStateChanged += VoipClientOnPhoneStateChanged;
-                _voipClient.Register(tbUserID.Text, tbPassword.Text);
+                _voipClient.Register(tbUserID.Text, tbSessionID.Text);
                 SetControlsToLoginState(true);
             }
             catch (WebApiException ex)

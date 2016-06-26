@@ -23,7 +23,8 @@ namespace VoipServer
                 _config.LocalSipPort, 
                 _config.LocalRtpPortRange.Item1, 
                 _config.LocalRtpPortRange.Item2,
-                _config.DatabaseConnectionString);
+                _config.DatabaseConnectionString,
+                _kernel.Get<ISessionCache>());
             _sipServer.Start();
             Console.WriteLine($"VoIP server started at {_config.LocalIP}:{_config.LocalSipPort} (UDP)");
         }

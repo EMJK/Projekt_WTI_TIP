@@ -8,6 +8,7 @@ using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Data;
 using System.Linq;
+using Common;
 using Ozeki.Network;
 using Ozeki.VoIP;
 
@@ -20,13 +21,25 @@ namespace VoipServer
         private readonly string _localAddress;
         private readonly Database _database;
         private readonly int _localPort;
+        private readonly ISessionCache _sessionCache;
 
-        public SipServer(string localAddress, int localPort, int minRtpPort, int maxRtpPort, string dbConnectionString)
+        public SipServer(string localAddress, int localPort, int minRtpPort, int maxRtpPort, string dbConnectionString, ISessionCache sessionCache)
             : base(minRtpPort, maxRtpPort)
         {
             _localAddress = localAddress;
             _localPort = localPort;
+            _sessionCache = sessionCache;
             _database = new Database(dbConnectionString);
+        }
+
+        protected override void OnSIPMessageReceived(SIPMessageInfo sipMessage, string userName, Endpoint remoteEndpoint)
+        {
+            base.OnSIPMessageReceived(sipMessage, userName, remoteEndpoint);
+        }
+
+        protected override void OnSIPMessageSent(SIPMessageInfo sipMessage, string userName, Endpoint remoteEndpoint)
+        {
+            base.OnSIPMessageSent(sipMessage, userName, remoteEndpoint);
         }
 
         protected override void OnStart()
@@ -37,26 +50,11 @@ namespace VoipServer
 
         protected override AuthenticationResult OnAuthenticationRequest(ISIPExtension extension, RequestAuthenticationInfo authInfo)
         {
-            Console.WriteLine("Authentication request received from: " + extension.ExtensionID);
+            Console.WriteLine("Authentication request received from: " + authInfo.From.UserName);
 
-            AuthenticationResult result = new AuthenticationResult();
-
-            string user = extension.ExtensionID;
-            //Get user's password from db
-            string command = "select password_hash from users where username = @user and status = 'A';";
-            DataTable table = _database.GetDataFromDB(command, "@user", user);
-            if (table.Rows != null && table.Rows.Count > 0 && table.Rows[0].ItemArray.Any())
-            {
-                string pass = table.Rows[0].ItemArray[0].ToString();
-                //UserInfo userInfo;
-                result = extension.CheckPassword(user, pass, authInfo);
-            }
-            else
-            {
-                Console.WriteLine("Cannot find extension. UserName: " + extension.ExtensionID);
-            }
-
-            if (result != null && result.AuthenticationAccepted)
+            var success = _sessionCache.VerifySession(authInfo.From.UserName, authInfo.AuthName);
+            
+            if (success)
             {
                 Console.WriteLine("Authentication accepted. UserName: " + extension.ExtensionID);
             }
@@ -65,7 +63,7 @@ namespace VoipServer
                 Console.WriteLine("Authentication denied. UserName: " + extension.ExtensionID);
             }
 
-            return result;
+            return new AuthenticationResult(success);
         }
 
         protected override RegisterResult OnRegisterReceived(ISIPExtension extension, SIPAddress from, int expires)
