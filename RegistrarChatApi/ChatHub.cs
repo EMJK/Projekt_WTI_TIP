@@ -32,8 +32,8 @@ namespace ChatServer
             return new Connection()
             {
                 ConnectionID = Context.ConnectionId,
-                SessionID = Context.QueryString.Get("SessionID")?.ToString().ToLower() ?? string.Empty,
-                UserID = Context.QueryString.Get("UserID")?.ToString().ToLower() ?? string.Empty
+                SessionID = Context.QueryString.Get("SessionID")?.ToLower() ?? string.Empty,
+                UserID = Context.QueryString.Get("UserID")?.ToLower() ?? string.Empty
             };
         }
 

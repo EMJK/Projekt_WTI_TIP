@@ -26,18 +26,12 @@ namespace VoipServer
         {
             _localAddress = localAddress;
             _localPort = localPort;
-            Console.WriteLine("SipServer starting...");
-
             _database = new Database(dbConnectionString);
         }
 
         protected override void OnStart()
         {
             SetListenPort(_localAddress, _localPort, Ozeki.Network.TransportType.Udp);
-
-            Console.WriteLine("SipServer started.");
-            Console.WriteLine($"Local address: {_localAddress}:{_localPort} (UDP)");
-
             base.OnStart();
         }
 

@@ -25,11 +25,13 @@ namespace VoipServer
                 _config.LocalRtpPortRange.Item2,
                 _config.DatabaseConnectionString);
             _sipServer.Start();
+            Console.WriteLine($"VoIP server started at {_config.LocalIP}:{_config.LocalSipPort} (UDP)");
         }
 
         public void Dispose()
         {
             _sipServer.Stop();
+            Console.WriteLine("VoIP server stopped");
         }
     }
 }
