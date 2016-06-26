@@ -87,7 +87,7 @@ namespace VoipClient
 
         private void SetPhoneStatus(PhoneStatus status, string otherUserId)
         {
-            if (PhoneState.Status != status && PhoneState.OtherUserId != otherUserId)
+            if (PhoneState.Status != status || PhoneState.OtherUserId != otherUserId)
             {
                 PhoneState = new PhoneState { OtherUserId = otherUserId, Status = status };
                 PhoneStateChanged?.Invoke(PhoneState);

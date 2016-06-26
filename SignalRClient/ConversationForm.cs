@@ -67,7 +67,7 @@ namespace Client
                     return;
                 }
 
-                if (phoneState.Status.IsOneOf(PhoneStatus.Registering, PhoneStatus.Registered))
+                if (phoneState.Status.IsOneOf(PhoneStatus.Registering))
                 {
                     btnCall.Enabled = false;
                     btnCall.Text = "Phone not ready";
