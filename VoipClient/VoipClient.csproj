@@ -35,7 +35,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="OzekiSDK">
-      <HintPath>..\..\Projekt_EM_JK\packages\OzekiSDK.dll</HintPath>
+      <HintPath>..\packages\OzekiSDK.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
