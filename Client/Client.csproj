@@ -143,15 +143,15 @@
       <Project>{906ee480-a1cb-4bc0-8272-5e977ac26190}</Project>
       <Name>Audio</Name>
     </ProjectReference>
-    <ProjectReference Include="..\RegistrarChatApiClient\ChatClient.csproj">
+    <ProjectReference Include="..\ChatClient\ChatClient.csproj">
       <Project>{6A733F41-9EBA-4F2D-AD95-FD1FDE3210F7}</Project>
       <Name>ChatClient</Name>
     </ProjectReference>
-    <ProjectReference Include="..\RegistrarCommon\Common.csproj">
+    <ProjectReference Include="..\Common\Common.csproj">
       <Project>{3d9dcdd7-1145-420d-9931-33070a3715d3}</Project>
       <Name>Common</Name>
     </ProjectReference>
-    <ProjectReference Include="..\RegistrarWebApiClient\WebApiClient.csproj">
+    <ProjectReference Include="..\WebApiClient\WebApiClient.csproj">
       <Project>{6f7dd597-04a5-45af-baf2-353aca792168}</Project>
       <Name>WebApiClient</Name>
     </ProjectReference>

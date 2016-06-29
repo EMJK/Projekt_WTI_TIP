@@ -111,19 +111,19 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\RegistrarChatApi\ChatServer.csproj">
+    <ProjectReference Include="..\ChatServer\ChatServer.csproj">
       <Project>{53600396-c5a9-4421-8ef8-a2415509be26}</Project>
       <Name>ChatServer</Name>
     </ProjectReference>
-    <ProjectReference Include="..\RegistrarCommon\Common.csproj">
+    <ProjectReference Include="..\Common\Common.csproj">
       <Project>{3d9dcdd7-1145-420d-9931-33070a3715d3}</Project>
       <Name>Common</Name>
     </ProjectReference>
-    <ProjectReference Include="..\RegistrarSipApi\VoipServer.csproj">
+    <ProjectReference Include="..\VoipServer\VoipServer.csproj">
       <Project>{49bcb3cf-3dfc-4b08-a845-7e66c8ab4dcf}</Project>
       <Name>VoipServer</Name>
     </ProjectReference>
-    <ProjectReference Include="..\RegistrarWebApi\WebApiServer.csproj">
+    <ProjectReference Include="..\WebApiServer\WebApiServer.csproj">
       <Project>{efd601ba-26e2-4150-b1ad-363cdf9e1df0}</Project>
       <Name>WebApiServer</Name>
     </ProjectReference>

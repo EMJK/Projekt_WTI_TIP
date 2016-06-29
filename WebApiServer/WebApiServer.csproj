@@ -91,11 +91,11 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\RegistrarCommon\Common.csproj">
+    <ProjectReference Include="..\Common\Common.csproj">
       <Project>{3D9DCDD7-1145-420D-9931-33070A3715D3}</Project>
       <Name>Common</Name>
     </ProjectReference>
-    <ProjectReference Include="..\RegistrarWebApiClient\WebApiClient.csproj">
+    <ProjectReference Include="..\WebApiClient\WebApiClient.csproj">
       <Project>{6f7dd597-04a5-45af-baf2-353aca792168}</Project>
       <Name>WebApiClient</Name>
     </ProjectReference>
