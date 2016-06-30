@@ -113,7 +113,7 @@ namespace VoipClient
         {
             lock (_lockObj)
             {
-                if (e.State == CallState.InCall)
+                if (e.State == CallState.InCall || e.State == CallState.Answered)
                 {
                     SetPhoneStatus(PhoneStatus.InCall, PhoneState.OtherUserId);
                 }

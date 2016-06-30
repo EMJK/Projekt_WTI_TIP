@@ -29,6 +29,9 @@ namespace Client
         private readonly Color _timestampColor = Color.DarkGray;
         private readonly Color _thisUserColor = Color.DodgerBlue;
         private readonly Color _otherUserColor = Color.DarkOrange;
+        private readonly Color _enabledBtnColor = Color.FromArgb(255, 255, 255);
+        private readonly Color _disabledBtnColor = Color.FromArgb(226, 226, 226);
+
         private readonly int _fontSize = 1;
 
         private readonly VoipClientModule _voipClient;
@@ -60,37 +63,48 @@ namespace Client
         {
             Invoke(() =>
             {
-                if (!phoneState.OtherUserId.IsOneOf(null, _otherUserId))
+                if (!phoneState.OtherUserId.IsOneOf(null, _otherUserId) || phoneState.Status.IsOneOf(PhoneStatus.Registering))
                 {
                     btnCall.Enabled = false;
-                    btnCall.Text = "Phone in use";
+                    btnHangUp.Enabled = false;
+                    btnCall.BackColor = _disabledBtnColor;
+                    btnHangUp.BackColor = _disabledBtnColor;
                     return;
-                }
-
-                if (phoneState.Status.IsOneOf(PhoneStatus.Registering))
-                {
-                    btnCall.Enabled = false;
-                    btnCall.Text = "Phone not ready";
                 }
                 else
                 {
-                    btnCall.Enabled = true;
                     switch (phoneState.Status)
                     {
                         case PhoneStatus.Calling:
+                        {
+                            btnCall.Enabled = false;
+                            btnHangUp.Enabled = true;
+                            btnCall.BackColor = _disabledBtnColor;
+                            btnHangUp.BackColor = _enabledBtnColor;
+                            break;
+                        }
                         case PhoneStatus.InCall:
                         {
-                            btnCall.Text = "Hang up";
+                            btnCall.Enabled = false;
+                            btnHangUp.Enabled = true;
+                            btnCall.BackColor = _disabledBtnColor;
+                            btnHangUp.BackColor = _enabledBtnColor;
                             break;
                         }
                         case PhoneStatus.IncomingCall:
                         {
-                            btnCall.Text = "Answer call";
+                            btnCall.Enabled = true;
+                            btnHangUp.Enabled = true;
+                            btnCall.BackColor = _enabledBtnColor;
+                            btnHangUp.BackColor = _enabledBtnColor;
                             break;
                         }
                         case PhoneStatus.Registered:
                         {
-                            btnCall.Text = "Make call";
+                            btnCall.Enabled = true;
+                            btnHangUp.Enabled = false;
+                            btnCall.BackColor = _enabledBtnColor;
+                            btnHangUp.BackColor = _disabledBtnColor;
                             break;
                         }
                     }
@@ -151,30 +165,6 @@ namespace Client
             SendMessage();
         }
 
-        private void btnCall_Click(object sender, EventArgs e)
-        {
-            btnCall.Enabled = false;
-            switch (_voipClient.PhoneState.Status)
-            {
-                case PhoneStatus.Calling:
-                case PhoneStatus.InCall:
-                {
-                    _voipClient.EndCall();
-                    break;
-                }
-                case PhoneStatus.IncomingCall:
-                {
-                    _voipClient.AnswerCall();
-                    break;
-                }
-                case PhoneStatus.Registered:
-                {
-                    _voipClient.StartCall(_otherUserId);
-                    break;
-                }
-            }
-        }
-
         private void ConversationForm_Load(object sender, EventArgs e)
         {
             VoipClientOnPhoneStateChanged(_voipClient.PhoneState);
@@ -189,6 +179,55 @@ namespace Client
             else
             {
                 action();
+            }
+        }
+
+        private void btnCall_Click(object sender, EventArgs e)
+        {
+            btnCall.Enabled = false;
+            btnHangUp.Enabled = false;
+            btnCall.BackColor = _disabledBtnColor;
+            btnHangUp.BackColor = _disabledBtnColor;
+
+            switch (_voipClient.PhoneState.Status)
+            {
+                case PhoneStatus.IncomingCall:
+                {
+                    _voipClient.AnswerCall();
+                    break;
+                }
+                case PhoneStatus.Registered:
+                {
+                    _voipClient.StartCall(_otherUserId);
+                    break;
+                }
+            }
+        }
+
+        private void btnHangUp_Click(object sender, EventArgs e)
+        {
+            btnCall.Enabled = false;
+            btnHangUp.Enabled = false;
+            btnCall.BackColor = _disabledBtnColor;
+            btnHangUp.BackColor = _disabledBtnColor;
+
+            switch (_voipClient.PhoneState.Status)
+            {
+                case PhoneStatus.IncomingCall:
+                {
+                    _voipClient.RejectCall();
+                    break;
+                }
+                case PhoneStatus.InCall:
+                {
+                    _voipClient.EndCall();
+                    break;
+                }
+                case PhoneStatus.Calling:
+                {
+                    _voipClient.EndCall();
+                    break;
+                }
             }
         }
     }

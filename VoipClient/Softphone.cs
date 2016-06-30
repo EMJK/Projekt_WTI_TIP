@@ -313,20 +313,10 @@ namespace VoipClient
         /// Hangs up the current call.
         /// </summary>
         public void HangUp()
-        {
-            if (_call != null)
-            {
-                if (_call.IsIncoming)
-                {
-                    _incomingCall = false;    
-                    _call.Reject();
-                }
-                if (_call.IsAnswered)
-                {
-                    _call.HangUp();
-                }
-                _call = null;
-            }
+        {  
+            _call?.Reject();
+            _call?.HangUp();
+            _call = null;
         }
 
         /// <summary>
