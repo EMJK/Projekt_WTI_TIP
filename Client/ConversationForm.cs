@@ -58,7 +58,7 @@ namespace Client
 
         private void VoipClientOnPhoneStateChanged(PhoneState phoneState)
         {
-            Invoke(new MethodInvoker(() =>
+            Invoke(() =>
             {
                 if (!phoneState.OtherUserId.IsOneOf(null, _otherUserId))
                 {
@@ -95,7 +95,7 @@ namespace Client
                         }
                     }
                 }
-            }));
+            });
         }
 
         public void AppendMessageFromOtherUser(string message)
@@ -178,6 +178,18 @@ namespace Client
         private void ConversationForm_Load(object sender, EventArgs e)
         {
             VoipClientOnPhoneStateChanged(_voipClient.PhoneState);
+        }
+
+        private void Invoke(Action action)
+        {
+            if(this.InvokeRequired)
+            {
+                this.Invoke(new MethodInvoker(action));
+            }
+            else
+            {
+                action();
+            }
         }
     }
 }
